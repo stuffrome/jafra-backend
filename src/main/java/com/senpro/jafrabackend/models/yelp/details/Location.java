@@ -12,12 +12,12 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Location {
-    String address1;
-    String address2;
-    String address3;
-    String city;
-    String zip_code;
-    String country;
-    String state;
-    List<String> displayAddress;
+    private String address1;
+    private String address2;
+    private String address3;
+    private String city;
+    private String zip_code;
+    private String country;
+    private String state;
+    private List<String> displayAddress;
 }

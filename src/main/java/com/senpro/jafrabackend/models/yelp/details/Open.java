@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Open {
-    Boolean is_overnight;
-    String start;
-    String end;
-    long day;
+    private Boolean is_overnight;
+    private String start;
+    private String end;
+    private long day;
 }

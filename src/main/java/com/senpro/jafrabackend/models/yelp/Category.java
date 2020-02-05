@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Category {
-    String alias;
-    String title;
+    private String alias;
+    private String title;
 }
