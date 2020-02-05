@@ -2,6 +2,7 @@ package com.senpro.jafrabackend.services;
 
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.yelp.Business;
+import com.senpro.jafrabackend.models.yelp.details.BusinessDetails;
 import com.senpro.jafrabackend.models.yelp.BusinessResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,16 +32,38 @@ public class YelpService {
         baseUrl = "https://api.yelp.com/v3";
     }
 
-    public List<Business> getRestaurants(String type, long latitude, long longitude) throws EntityNotFoundException {
+    // Gets more details about a particular business
+    public BusinessDetails getBusinessDetails(String id) throws EntityNotFoundException {
+
+        String url = baseUrl + "/businesses/" + id;
+
+        setHeaders();
+
+        ResponseEntity<BusinessDetails> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>("parameters", headers),
+                BusinessDetails.class
+        );
+
+        BusinessDetails businessDetails = response.getBody();
+        if (businessDetails == null) throw new EntityNotFoundException("Restaurant");
+        return businessDetails;
+    }
+
+    // Searches for restaurants using Yelp's API
+    public List<Business> getRestaurants(String categories, long latitude, long longitude, long radius) throws EntityNotFoundException {
 
         String url =
                 baseUrl +
-                        "/businesses/search?term=food&latitude=" +
+                        "/businesses/search?latitude=" +
                         latitude +
                         "&longitude=" +
                         longitude +
-                        "&radius=4000&sort_by=distance&limit=10&categories=" +
-                        type;
+                        "&radius=" +
+                        radius +
+                        "&sort_by=distance&limit=50&categories=" +
+                        categories;
 
         setHeaders();
         ResponseEntity<BusinessResponseWrapper> response = restTemplate.exchange(
@@ -55,11 +78,13 @@ public class YelpService {
         return businessWrapper.getBusinesses();
     }
 
+    // Set's the headers
     private void setHeaders() {
         headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + authToken);
     }
 
+    // Validates the response for the business search call
     private void validateResponse(BusinessResponseWrapper wrapper) throws EntityNotFoundException {
         if (wrapper == null) throw new EntityNotFoundException("Restaurants");
         if (wrapper.getBusinesses() == null) throw new EntityNotFoundException("Restaurants");

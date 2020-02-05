@@ -23,22 +23,26 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    // Returns all users in the database
     public List<User> getUsers() throws EntityNotFoundException {
         List<User> users = userRepository.findAll();
         if (users == null) throw new EntityNotFoundException("Users");
         return users;
     }
 
+    // Adds a user to the database
     public void addUser(User user) throws InvalidNameException, EntityExistsException {
         validateUser(user);
         userRepository.save(user);
     }
 
+    // Finds a user by ID
     public User findById(String id) throws EntityNotFoundException {
         Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with id"));
     }
 
+    // Validates user fields
     private void validateUser(User user) throws InvalidNameException, EntityExistsException {
         if (containsSpecialCharacters(user.getName())) {
             throw new InvalidNameException("Name " + user.getName() + " is invalid.");
@@ -54,12 +58,14 @@ public class UserService {
         }
     }
 
+    // Checks for special characters
     private boolean containsSpecialCharacters(String value) {
         Pattern pattern = Pattern.compile("[a-zA-Z0-9]*");
         Matcher matcher = pattern.matcher(value);
         return !matcher.matches();
     }
 
+    // Validates email format
     /*
      *  Taken directly from:
      *  https://www.geeksforgeeks.org/check-email-address-valid-not-java/

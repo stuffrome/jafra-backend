@@ -2,6 +2,7 @@ package com.senpro.jafrabackend.controllers;
 
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.yelp.Business;
+import com.senpro.jafrabackend.models.yelp.details.BusinessDetails;
 import com.senpro.jafrabackend.services.YelpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,16 @@ public class YelpController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Business>> getRestaurants(@RequestParam String type,
+    public ResponseEntity<List<Business>> getRestaurants(@RequestParam(required = false) String categories,
                                                          @RequestParam String latitude,
-                                                         @RequestParam String longitude) throws EntityNotFoundException {
-        return ResponseEntity.status(HttpStatus.OK).body(yelpService.getRestaurants(type, Long.parseLong(latitude), Long.parseLong(longitude)));
+                                                         @RequestParam String longitude,
+                                                         @RequestParam String radius) throws EntityNotFoundException {
+        if (categories == null) categories = "restaurants";
+        return ResponseEntity.status(HttpStatus.OK).body(yelpService.getRestaurants(categories, Long.parseLong(latitude), Long.parseLong(longitude), Long.parseLong(radius)));
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<BusinessDetails> getRestaurantDetails(@RequestParam String id) throws EntityNotFoundException {
+        return ResponseEntity.status(HttpStatus.OK).body(yelpService.getBusinessDetails(id));
     }
 }

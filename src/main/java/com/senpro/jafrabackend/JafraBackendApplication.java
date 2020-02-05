@@ -13,6 +13,7 @@ public class JafraBackendApplication {
 		SpringApplication.run(JafraBackendApplication.class, args);
 	}
 
+	// Creates the RestTemplate to make API calls
 	@Bean
 	public RestTemplate yelpRestTemplate(RestTemplateBuilder builder) {
 		return builder.build();
