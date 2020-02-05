@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BusinessDetails extends Business {
-    private List<String> photos;
-    private Location location;
-    private List<Hours> hours;
+  private List<String> photos;
+  private Location location;
+  private List<Hours> hours;
 }

@@ -18,24 +18,33 @@ import java.util.List;
 @RequestMapping("/api/yelp")
 public class YelpController {
 
-    private YelpService yelpService;
+  private YelpService yelpService;
+  private static final String defaultCategory = "restaurants";
 
-    @Autowired
-    public YelpController(YelpService yelpService) {
-        this.yelpService = yelpService;
-    }
+  @Autowired
+  public YelpController(YelpService yelpService) {
+    this.yelpService = yelpService;
+  }
 
-    @GetMapping
-    public ResponseEntity<List<Business>> getRestaurants(@RequestParam(required = false) String categories,
-                                                         @RequestParam String latitude,
-                                                         @RequestParam String longitude,
-                                                         @RequestParam String radius) throws EntityNotFoundException {
-        if (categories == null) categories = "restaurants";
-        return ResponseEntity.status(HttpStatus.OK).body(yelpService.getRestaurants(categories, Long.parseLong(latitude), Long.parseLong(longitude), Long.parseLong(radius)));
-    }
+  @GetMapping
+  public ResponseEntity<List<Business>> getRestaurants(
+      @RequestParam(required = false) String categories,
+      @RequestParam String latitude,
+      @RequestParam String longitude,
+      @RequestParam String radius)
+      throws EntityNotFoundException {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            yelpService.getRestaurants(
+                categories == null ? defaultCategory : categories,
+                Long.parseLong(latitude),
+                Long.parseLong(longitude),
+                Long.parseLong(radius)));
+  }
 
-    @GetMapping("/details")
-    public ResponseEntity<BusinessDetails> getRestaurantDetails(@RequestParam String id) throws EntityNotFoundException {
-        return ResponseEntity.status(HttpStatus.OK).body(yelpService.getBusinessDetails(id));
-    }
+  @GetMapping("/details")
+  public ResponseEntity<BusinessDetails> getRestaurantDetails(@RequestParam String id)
+      throws EntityNotFoundException {
+    return ResponseEntity.status(HttpStatus.OK).body(yelpService.getBusinessDetails(id));
+  }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Hours {
-    private List<Open> open;
-    private String hours_type;
-    private Boolean is_open_now;
+  private List<Open> open;
+  private String hours_type;
+  private Boolean is_open_now;
 }

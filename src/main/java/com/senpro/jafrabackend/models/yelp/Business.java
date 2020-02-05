@@ -18,14 +18,14 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Business {
-    private String id;
-    private String alias;
-    private String name;
-    private String image_url;
-    private Boolean isClosed;
-    private long reviewCount;
-    private List<Category> categories;
-    private Double rating;
-    private Price price;
-    private double distance;
+  private String id;
+  private String alias;
+  private String name;
+  private String image_url;
+  private Boolean isClosed;
+  private long reviewCount;
+  private List<Category> categories;
+  private Double rating;
+  private Price price;
+  private double distance;
 }

@@ -20,74 +20,74 @@ import java.util.List;
 @PropertySource("classpath:credentials.properties")
 public class YelpService {
 
-    @Value("${yelp.token}")
-    private String authToken;
-    private String baseUrl;
-    private RestTemplate restTemplate;
-    private HttpHeaders headers;
+  @Value("${yelp.token}")
+  private String authToken;
 
-    @Autowired
-    public YelpService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-        baseUrl = "https://api.yelp.com/v3";
-    }
+  private String baseUrl;
+  private RestTemplate restTemplate;
+  private HttpHeaders headers;
 
-    // Gets more details about a particular business
-    public BusinessDetails getBusinessDetails(String id) throws EntityNotFoundException {
+  @Autowired
+  public YelpService(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
+    baseUrl = "https://api.yelp.com/v3";
+  }
 
-        String url = baseUrl + "/businesses/" + id;
+  // Gets more details about a particular business
+  public BusinessDetails getBusinessDetails(String id) throws EntityNotFoundException {
 
-        setHeaders();
+    String url = baseUrl + "/businesses/" + id;
 
-        ResponseEntity<BusinessDetails> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                new HttpEntity<>("parameters", headers),
-                BusinessDetails.class
-        );
+    setHeaders();
 
-        BusinessDetails businessDetails = response.getBody();
-        if (businessDetails == null) throw new EntityNotFoundException("Restaurant");
-        return businessDetails;
-    }
+    ResponseEntity<BusinessDetails> response =
+        restTemplate.exchange(
+            url, HttpMethod.GET, new HttpEntity<>("parameters", headers), BusinessDetails.class);
 
-    // Searches for restaurants using Yelp's API
-    public List<Business> getRestaurants(String categories, long latitude, long longitude, long radius) throws EntityNotFoundException {
+    BusinessDetails businessDetails = response.getBody();
+    if (businessDetails == null) throw new EntityNotFoundException("Restaurant");
+    return businessDetails;
+  }
 
-        String url =
-                baseUrl +
-                        "/businesses/search?latitude=" +
-                        latitude +
-                        "&longitude=" +
-                        longitude +
-                        "&radius=" +
-                        radius +
-                        "&sort_by=distance&limit=50&categories=" +
-                        categories;
+  // Searches for restaurants using Yelp's API
+  public List<Business> getRestaurants(
+      String categories, long latitude, long longitude, long radius)
+      throws EntityNotFoundException {
 
-        setHeaders();
-        ResponseEntity<BusinessResponseWrapper> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                new HttpEntity<>("parameters", headers),
-                BusinessResponseWrapper.class
-        );
+    String url =
+        baseUrl
+            + "/businesses/search?latitude="
+            + latitude
+            + "&longitude="
+            + longitude
+            + "&radius="
+            + radius
+            + "&sort_by=distance&limit=50&categories="
+            + categories;
 
-        BusinessResponseWrapper businessWrapper = response.getBody();
-        validateResponse(businessWrapper);
-        return businessWrapper.getBusinesses();
-    }
+    setHeaders();
+    ResponseEntity<BusinessResponseWrapper> response =
+        restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            new HttpEntity<>("parameters", headers),
+            BusinessResponseWrapper.class);
 
-    // Set's the headers
-    private void setHeaders() {
-        headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + authToken);
-    }
+    BusinessResponseWrapper businessWrapper = response.getBody();
+    validateResponse(businessWrapper);
+    return businessWrapper.getBusinesses();
+  }
 
-    // Validates the response for the business search call
-    private void validateResponse(BusinessResponseWrapper wrapper) throws EntityNotFoundException {
-        if (wrapper == null) throw new EntityNotFoundException("Restaurants");
-        if (wrapper.getBusinesses() == null) throw new EntityNotFoundException("Restaurants");
-        if (wrapper.getBusinesses().size() == 0) throw new EntityNotFoundException("Restaurants");
-    }
+  // Set's the headers
+  private void setHeaders() {
+    headers = new HttpHeaders();
+    headers.add("Authorization", "Bearer " + authToken);
+  }
+
+  // Validates the response for the business search call
+  private void validateResponse(BusinessResponseWrapper wrapper) throws EntityNotFoundException {
+    if (wrapper == null) throw new EntityNotFoundException("Restaurants");
+    if (wrapper.getBusinesses() == null) throw new EntityNotFoundException("Restaurants");
+    if (wrapper.getBusinesses().size() == 0) throw new EntityNotFoundException("Restaurants");
+  }
 }

@@ -16,69 +16,69 @@ import java.util.regex.Pattern;
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
+  private UserRepository userRepository;
 
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+  @Autowired
+  public UserService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  // Returns all users in the database
+  public List<User> getUsers() throws EntityNotFoundException {
+    List<User> users = userRepository.findAll();
+    if (users == null) throw new EntityNotFoundException("Users");
+    return users;
+  }
+
+  // Adds a user to the database
+  public void addUser(User user) throws InvalidNameException, EntityExistsException {
+    validateUser(user);
+    userRepository.save(user);
+  }
+
+  // Finds a user by ID
+  public User findById(String id) throws EntityNotFoundException {
+    Optional<User> optionalUser = userRepository.findById(id);
+    return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with id"));
+  }
+
+  // Validates user fields
+  private void validateUser(User user) throws InvalidNameException, EntityExistsException {
+    if (containsSpecialCharacters(user.getName())) {
+      throw new InvalidNameException("Name " + user.getName() + " is invalid.");
     }
-
-    // Returns all users in the database
-    public List<User> getUsers() throws EntityNotFoundException {
-        List<User> users = userRepository.findAll();
-        if (users == null) throw new EntityNotFoundException("Users");
-        return users;
+    if (validEmail(user.getEmail())) {
+      throw new InvalidNameException("Email " + user.getEmail() + " is invalid.");
     }
-
-    // Adds a user to the database
-    public void addUser(User user) throws InvalidNameException, EntityExistsException {
-        validateUser(user);
-        userRepository.save(user);
+    if (userRepository.existsByEmail(user.getEmail())) {
+      throw new EntityExistsException("User with email " + user.getEmail());
     }
-
-    // Finds a user by ID
-    public User findById(String id) throws EntityNotFoundException {
-        Optional<User> optionalUser = userRepository.findById(id);
-        return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with id"));
+    if (userRepository.existsByUsername(user.getUsername())) {
+      throw new EntityExistsException("User with username " + user.getUsername());
     }
+  }
 
-    // Validates user fields
-    private void validateUser(User user) throws InvalidNameException, EntityExistsException {
-        if (containsSpecialCharacters(user.getName())) {
-            throw new InvalidNameException("Name " + user.getName() + " is invalid.");
-        }
-        if (validEmail(user.getEmail())) {
-            throw new InvalidNameException("Email " + user.getEmail() + " is invalid.");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new EntityExistsException("User with email " + user.getEmail());
-        }
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new EntityExistsException("User with username " + user.getUsername());
-        }
-    }
+  // Checks for special characters
+  private boolean containsSpecialCharacters(String value) {
+    Pattern pattern = Pattern.compile("[a-zA-Z0-9]*");
+    Matcher matcher = pattern.matcher(value);
+    return !matcher.matches();
+  }
 
-    // Checks for special characters
-    private boolean containsSpecialCharacters(String value) {
-        Pattern pattern = Pattern.compile("[a-zA-Z0-9]*");
-        Matcher matcher = pattern.matcher(value);
-        return !matcher.matches();
-    }
+  // Validates email format
+  /*
+   *  Taken directly from:
+   *  https://www.geeksforgeeks.org/check-email-address-valid-not-java/
+   */
+  private boolean validEmail(String email) {
+    String emailRegex =
+        "^[a-zA-Z0-9_+&*-]+(?:\\."
+            + "[a-zA-Z0-9_+&*-]+)*@"
+            + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+            + "A-Z]{2,7}$";
 
-    // Validates email format
-    /*
-     *  Taken directly from:
-     *  https://www.geeksforgeeks.org/check-email-address-valid-not-java/
-     */
-    private boolean validEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
-                "[a-zA-Z0-9_+&*-]+)*@" +
-                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
-                "A-Z]{2,7}$";
-
-        Pattern pat = Pattern.compile(emailRegex);
-        if (email == null)
-            return false;
-        return pat.matcher(email).matches();
-    }
+    Pattern pat = Pattern.compile(emailRegex);
+    if (email == null) return false;
+    return pat.matcher(email).matches();
+  }
 }
