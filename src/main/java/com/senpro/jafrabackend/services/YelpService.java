@@ -17,20 +17,20 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
-@PropertySource("classpath:credentials.properties")
+@PropertySource("classpath:yelp.properties")
 public class YelpService {
 
   @Value("${yelp.token}")
   private String authToken;
-
+  @Value("${yelp.url}")
   private String baseUrl;
+
   private RestTemplate restTemplate;
   private HttpHeaders headers;
 
   @Autowired
   public YelpService(RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
-    baseUrl = "https://api.yelp.com/v3";
   }
 
   // Gets more details about a particular business

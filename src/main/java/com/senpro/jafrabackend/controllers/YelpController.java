@@ -15,11 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/yelp")
+@RequestMapping("/yelp")
 public class YelpController {
 
   private YelpService yelpService;
-  private static final String defaultCategory = "restaurants";
 
   @Autowired
   public YelpController(YelpService yelpService) {
@@ -28,7 +27,7 @@ public class YelpController {
 
   @GetMapping
   public ResponseEntity<List<Business>> getRestaurants(
-      @RequestParam(required = false) String categories,
+      @RequestParam(required = false, defaultValue = "restaurants") String categories,
       @RequestParam String latitude,
       @RequestParam String longitude,
       @RequestParam String radius)
@@ -36,7 +35,7 @@ public class YelpController {
     return ResponseEntity.status(HttpStatus.OK)
         .body(
             yelpService.getRestaurants(
-                categories == null ? defaultCategory : categories,
+                categories,
                 Long.parseLong(latitude),
                 Long.parseLong(longitude),
                 Long.parseLong(radius)));
