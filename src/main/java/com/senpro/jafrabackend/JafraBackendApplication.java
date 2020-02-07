@@ -9,12 +9,13 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class JafraBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(JafraBackendApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(JafraBackendApplication.class, args);
+  }
 
-	@Bean
-	public RestTemplate yelpRestTemplate(RestTemplateBuilder builder) {
-		return builder.build();
-	}
+  // Creates the RestTemplate to make API calls
+  @Bean
+  public RestTemplate yelpRestTemplate(RestTemplateBuilder builder) {
+    return builder.build();
+  }
 }

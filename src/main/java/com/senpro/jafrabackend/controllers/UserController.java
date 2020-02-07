@@ -19,31 +19,32 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @CrossOrigin(origins = "https://jafra.herokuapp.com")
-//@CrossOrigin(origins = "http://localhost:4200")
+// @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
-    private UserService userService;
+  private UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+  @Autowired
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
-    @GetMapping
-    public ResponseEntity<List<User>> getUsers() throws EntityNotFoundException {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getUsers());
-    }
+  @GetMapping
+  public ResponseEntity<List<User>> getUsers() throws EntityNotFoundException {
+    return ResponseEntity.status(HttpStatus.OK).body(userService.getUsers());
+  }
 
-    @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody User user) throws InvalidNameException, EntityExistsException {
-        userService.addUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
-    }
+  @PostMapping
+  public ResponseEntity<String> addUser(@RequestBody User user)
+      throws InvalidNameException, EntityExistsException {
+    userService.addUser(user);
+    return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
+  }
 
-    @GetMapping("/id")
-    public ResponseEntity<User> findUserById(@RequestParam String id) throws EntityNotFoundException {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findById(id));
-    }
+  @GetMapping("/id")
+  public ResponseEntity<User> findUserById(@RequestParam String id) throws EntityNotFoundException {
+    return ResponseEntity.status(HttpStatus.OK).body(userService.findById(id));
+  }
 }
