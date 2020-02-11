@@ -3,7 +3,7 @@ package com.senpro.jafrabackend.controllers;
 import com.senpro.jafrabackend.exceptions.EntityExistsException;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.exceptions.InvalidNameException;
-import com.senpro.jafrabackend.models.User;
+import com.senpro.jafrabackend.models.user.User;
 import com.senpro.jafrabackend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
