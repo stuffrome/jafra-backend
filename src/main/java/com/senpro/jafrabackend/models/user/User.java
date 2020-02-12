@@ -13,12 +13,11 @@ import java.util.List;
 @Data
 @Document(collection = "users")
 public class User {
-  @Id private String id;
+  private String id;
   private final String name;
   private final String email;
   private String username;
-  private List <VisitedRestaurant> visitedRestaurants;
-  private List <String> hiddenRestaurants;
+  private List <String> hiddenRestaurants;  //list of IDs
   private List <CuisinePreference> cuisinePreferences;
   private List <PricePreference> pricePreferences;
   private RatingPreference ratingPreference;
