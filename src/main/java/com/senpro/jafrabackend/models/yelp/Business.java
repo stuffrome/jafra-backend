@@ -2,7 +2,6 @@ package com.senpro.jafrabackend.models.yelp;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.senpro.jafrabackend.enums.Price;
 import lombok.AllArgsConstructor;
 import lombok.Data;
