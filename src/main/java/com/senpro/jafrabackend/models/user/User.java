@@ -1,5 +1,9 @@
 package com.senpro.jafrabackend.models.user;
 
+import com.senpro.jafrabackend.models.user.preferences.CuisinePreference;
+import com.senpro.jafrabackend.models.user.preferences.DistancePreference;
+import com.senpro.jafrabackend.models.user.preferences.PricePreference;
+import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +17,11 @@ public class User {
   private final String name;
   private final String email;
   private String username;
-  private List <String> visitedRestaurants;
-  private List <Preference> preferences;
+  private List <VisitedRestaurant> visitedRestaurants;
+  private List <String> hiddenRestaurants;
+  private List <CuisinePreference> cuisinePreferences;
+  private List <PricePreference> pricePreferences;
+  private RatingPreference ratingPreference;
+  private PricePreference pricePreference;
+  private DistancePreference distancePreference;
 }
