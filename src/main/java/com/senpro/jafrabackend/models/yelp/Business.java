@@ -1,6 +1,8 @@
 package com.senpro.jafrabackend.models.yelp;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.senpro.jafrabackend.enums.Price;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +23,11 @@ public class Business {
   private String id;
   private String alias;
   private String name;
-  private String image_url;
+  @JsonAlias(value = "image_url")
+  private String imageUrl;
+  @JsonAlias(value = "is_closed")
   private Boolean isClosed;
+  @JsonAlias(value = "review_count")
   private long reviewCount;
   private List<Category> categories;
   private Double rating;
