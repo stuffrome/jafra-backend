@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class DistancePreference {
-    //stores the average distance that the user enjoys traveling
-    //will increase if user visits a restaurant further than avg and gives it a positive review
-    private float preferenceWeight;
+  // stores the average distance that the user enjoys traveling
+  // will being under this weight will give a positive boost
+  private float preferenceWeigh = 0;
 }

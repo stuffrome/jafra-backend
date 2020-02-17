@@ -37,9 +37,10 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<String> addUser(@RequestBody User user)
+  public ResponseEntity<String> addUser(
+      @RequestParam String name, @RequestParam String email, @RequestParam String username)
       throws InvalidNameException, EntityExistsException {
-    userService.addUser(user);
+    userService.addUser(name, email, username);
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
   }
 

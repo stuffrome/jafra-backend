@@ -22,6 +22,7 @@ public class YelpService {
 
   @Value("${yelp.token}")
   private String authToken;
+
   @Value("${yelp.url}")
   private String baseUrl;
 
