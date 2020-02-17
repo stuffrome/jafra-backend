@@ -19,7 +19,7 @@ public class RestaurantService {
   }
 
   public List<Restaurant> getRestaurants(
-      String categories, long latitude, long longitude, long radius)
+      String categories, double latitude, double longitude, long radius)
       throws EntityNotFoundException {
     return apiService.getRestaurants(categories, latitude, longitude, radius);
   }

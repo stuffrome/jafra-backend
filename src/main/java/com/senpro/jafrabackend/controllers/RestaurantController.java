@@ -36,8 +36,8 @@ public class RestaurantController {
         .body(
             restaurantService.getRestaurants(
                 categories,
-                Long.parseLong(latitude),
-                Long.parseLong(longitude),
+                Double.parseDouble(latitude),
+                Double.parseDouble(longitude),
                 Long.parseLong(radius)));
   }
 

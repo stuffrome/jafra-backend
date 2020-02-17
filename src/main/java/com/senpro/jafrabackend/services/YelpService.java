@@ -52,7 +52,7 @@ public class YelpService {
 
   // Searches for restaurants using Yelp's API
   public List<Restaurant> getRestaurants(
-      String categories, long latitude, long longitude, long radius)
+      String categories, double latitude, double longitude, long radius)
       throws EntityNotFoundException {
 
     String url =
