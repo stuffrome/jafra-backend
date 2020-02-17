@@ -1,7 +1,7 @@
 package com.senpro.jafrabackend.models.yelp.details;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.senpro.jafrabackend.models.yelp.Business;
+import com.senpro.jafrabackend.models.yelp.Restaurant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BusinessDetails extends Business {
+public class BusinessDetails extends Restaurant {
   private List<String> photos;
   private Location location;
   private List<Hours> hours;
