@@ -1,5 +1,6 @@
 package com.senpro.jafrabackend.models.yelp.details;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,8 +17,10 @@ public class Location {
   private String address2;
   private String address3;
   private String city;
-  private String zip_code;
+  @JsonAlias(value = "zip_code")
+  private String zipCode;
   private String country;
   private String state;
+  @JsonAlias(value = "display_address")
   private List<String> displayAddress;
 }
