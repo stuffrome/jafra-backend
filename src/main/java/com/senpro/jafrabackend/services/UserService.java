@@ -51,9 +51,9 @@ public class UserService {
   }
 
   // Finds a user by ID
-  public User findById(String id) throws EntityNotFoundException {
-    Optional<User> optionalUser = userRepository.findById(id);
-    return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with id"));
+  public User findById(String username) throws EntityNotFoundException {
+    Optional<User> optionalUser = userRepository.findById(username);
+    return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with username" + username ));
   }
 
   // Validates user fields

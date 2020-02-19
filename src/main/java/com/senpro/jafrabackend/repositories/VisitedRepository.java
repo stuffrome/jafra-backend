@@ -9,9 +9,7 @@ import java.util.List;
 
 @Repository
 public interface VisitedRepository extends MongoRepository<VisitedRestaurant, String> {
-  boolean existsByRestaurantIDAndUsername(String restaurantID, String username);
+  boolean existsById_UsernameAndId_RestaurantId(String username, String restaurantId);
 
-  List<VisitedRestaurant> getAllByUsername(String username);
-
-  VisitedRestaurant getByUsernameAndAndRestaurantID(String restaurantID, String username);
+  List<VisitedRestaurant> getAllById_Username(String username);
 }

@@ -45,7 +45,7 @@ public class UserController {
   }
 
   @GetMapping("/id")
-  public ResponseEntity<User> findUserById(@RequestParam String id) throws EntityNotFoundException {
-    return ResponseEntity.status(HttpStatus.OK).body(userService.findById(id));
+  public ResponseEntity<User> findUserById(@RequestParam String username) throws EntityNotFoundException {
+    return ResponseEntity.status(HttpStatus.OK).body(userService.findById(username));
   }
 }

@@ -43,11 +43,21 @@ public class VisitedController {
   @PostMapping
   public ResponseEntity<String> addVisitedRestaurant(
       @RequestParam String username,
-      @RequestParam String restaurantID,
+      @RequestParam String restaurantId,
       @RequestParam float userRating)
       throws InvalidNameException, EntityExistsException, EntityNotFoundException {
     userService.findById(username);
-    visitedService.addVisitedRestaurant(username, restaurantID, userRating);
+    visitedService.addVisitedRestaurant(username, restaurantId, userRating);
+    return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
+  }
+
+  @PostMapping("/id")
+  public ResponseEntity<String> updateVisitedRestaurant(
+      @RequestParam String username,
+      @RequestParam String restaurantId,
+      @RequestParam float userRating)
+      throws EntityNotFoundException{
+    visitedService.updateVisitedRestaurant(username, restaurantId, userRating);
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
   }
 

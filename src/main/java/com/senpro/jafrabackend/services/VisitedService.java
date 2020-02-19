@@ -3,13 +3,10 @@ package com.senpro.jafrabackend.services;
 import com.senpro.jafrabackend.exceptions.EntityExistsException;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.exceptions.InvalidNameException;
-import com.senpro.jafrabackend.models.user.User;
 import com.senpro.jafrabackend.models.user.VisitedRestaurant;
 import com.senpro.jafrabackend.repositories.VisitedRepository;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
 import java.util.List;
@@ -25,16 +22,32 @@ public class VisitedService {
   }
 
   // Adds a visited to the database
-  public void addVisitedRestaurant(String username, String restaurantID, float userRating)
+  public void addVisitedRestaurant(String username, String restaurantId, float userRating)
       throws InvalidNameException, EntityExistsException {
     VisitedRestaurant visited = new VisitedRestaurant();
-    visited.setRestaurantID(restaurantID);
-    visited.setUsername(username);
+    VisitedRestaurant.VisitedKey id = new VisitedRestaurant.VisitedKey();
+    id.setUsername(username);
+    id.setRestaurantId(restaurantId);
+    visited.setId(id);
     visited.setUserRating(userRating);
+    visited.setReviewDate(new Date());
     validateVisited(visited);
     visitedRepository.save(visited);
   }
 
+  public void updateVisitedRestaurant(String username, String restaurantId, float userRating)
+      throws EntityNotFoundException {
+    VisitedRestaurant visited = new VisitedRestaurant();
+    VisitedRestaurant.VisitedKey id = new VisitedRestaurant.VisitedKey();
+    id.setUsername(username);
+    id.setRestaurantId(restaurantId);
+    visited.setId(id);
+    visited.setUserRating(userRating);
+    visited.setReviewDate(new Date());
+    validateUpdate(visited);
+    visitedRepository.deleteById(visited.getId().toString());
+    visitedRepository.save(visited);
+  }
   // Returns all users in the database
   public List<VisitedRestaurant> getVisitedRestaurants() throws EntityNotFoundException {
     List<VisitedRestaurant> visited = visitedRepository.findAll();
@@ -44,29 +57,42 @@ public class VisitedService {
 
   // Finds a visited by userID
   public List<VisitedRestaurant> findByUsername(String username) throws EntityNotFoundException {
-    List<VisitedRestaurant> visited = visitedRepository.getAllByUsername(username);
+    List<VisitedRestaurant> visited = visitedRepository.getAllById_Username(username);
     if (visited == null) throw new EntityNotFoundException("Visited");
     return visited;
   }
 
   // Finds a visited by ID
-  public VisitedRestaurant findById(String username, String restaurantID)
+  public VisitedRestaurant findById(String username, String restaurantId)
       throws EntityNotFoundException {
-    VisitedRestaurant visited =
-        visitedRepository.getByUsernameAndAndRestaurantID(username, restaurantID);
-    if (visited == null) throw new EntityNotFoundException("Visited");
-    return visited;
+    VisitedRestaurant.VisitedKey id = new VisitedRestaurant.VisitedKey();
+    id.setUsername(username);
+    id.setRestaurantId(restaurantId);
+    Optional<VisitedRestaurant> visited = visitedRepository.findById(id.toString());
+    return visited.orElseThrow(
+        () -> new EntityNotFoundException("Visited with id " + username + restaurantId));
   }
 
   private void validateVisited(VisitedRestaurant visited)
       throws InvalidNameException, EntityExistsException {
-    if (visitedRepository.existsByRestaurantIDAndUsername(
-        visited.getRestaurantID(), visited.getUsername())) {
+    if (visitedRepository.existsById_UsernameAndId_RestaurantId(
+        visited.getId().getUsername(), visited.getId().getRestaurantId())) {
       throw new EntityExistsException(
-          "VisitedRestaurant with restaurantId "
-              + visited.getRestaurantID()
-              + " and userID "
-              + visited.getUsername());
+          "VisitedRestaurant with username "
+              + visited.getId().getUsername()
+              + " and restaurantId "
+              + visited.getId().getRestaurantId());
+    }
+  }
+
+  private void validateUpdate(VisitedRestaurant visited) throws EntityNotFoundException {
+    if (!visitedRepository.existsById_UsernameAndId_RestaurantId(
+        visited.getId().getUsername(), visited.getId().getRestaurantId())) {
+      throw new EntityNotFoundException(
+          "VisitedRestaurant with username "
+              + visited.getId().getUsername()
+              + " and restaurantId "
+              + visited.getId().getRestaurantId());
     }
   }
 }
