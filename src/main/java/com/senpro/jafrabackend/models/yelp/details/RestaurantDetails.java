@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BusinessDetails extends Restaurant {
+public class RestaurantDetails extends Restaurant {
   private List<String> photos;
   private Location location;
   private List<Hours> hours;

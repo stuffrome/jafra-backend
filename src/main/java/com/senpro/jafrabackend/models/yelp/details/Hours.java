@@ -1,5 +1,6 @@
 package com.senpro.jafrabackend.models.yelp.details;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Hours {
   private List<Open> open;
-  private String hours_type;
-  private Boolean is_open_now;
+  @JsonAlias(value = "hours_type")
+  private String hoursType;
+  @JsonAlias(value = "is_open_now")
+  private Boolean isOpenNow;
 }
