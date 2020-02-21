@@ -14,16 +14,19 @@ import java.util.Optional;
 
 @Service
 public class VisitedService {
+
   private VisitedRepository visitedRepository;
+  private RestaurantService restaurantService;
 
   @Autowired
-  public VisitedService(VisitedRepository visitedRepository) {
+  public VisitedService(VisitedRepository visitedRepository, RestaurantService restaurantService) {
     this.visitedRepository = visitedRepository;
+    this.restaurantService = restaurantService;
   }
 
   // Adds a visited to the database
   public void addVisitedRestaurant(String username, String restaurantId, float userRating)
-      throws InvalidNameException, EntityExistsException {
+      throws InvalidNameException, EntityExistsException, EntityNotFoundException {
     VisitedRestaurant visited = new VisitedRestaurant();
     VisitedRestaurant.VisitedKey id = new VisitedRestaurant.VisitedKey();
     id.setUsername(username);
@@ -33,10 +36,12 @@ public class VisitedService {
     visited.setReviewDate(new Date());
     validateVisited(visited);
     visitedRepository.save(visited);
+    // Update the user's recommended restaurants whenever preferences change
+    restaurantService.updateUserRestaurants(username);
   }
 
   public void updateVisitedRestaurant(String username, String restaurantId, float userRating)
-      throws EntityNotFoundException {
+      throws EntityNotFoundException, EntityNotFoundException {
     VisitedRestaurant visited = new VisitedRestaurant();
     VisitedRestaurant.VisitedKey id = new VisitedRestaurant.VisitedKey();
     id.setUsername(username);
@@ -47,6 +52,8 @@ public class VisitedService {
     validateUpdate(visited);
     visitedRepository.deleteById(visited.getId().toString());
     visitedRepository.save(visited);
+    // Update the user's recommended restaurants whenever preferences change
+    restaurantService.updateUserRestaurants(username);
   }
   // Returns all users in the database
   public List<VisitedRestaurant> getVisitedRestaurants() throws EntityNotFoundException {

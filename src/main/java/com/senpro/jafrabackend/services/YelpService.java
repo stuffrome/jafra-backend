@@ -52,7 +52,7 @@ public class YelpService {
 
   // Searches for restaurants using Yelp's API
   public List<Restaurant> getRestaurants(
-      String categories, double latitude, double longitude, long radius)
+      String categories, double latitude, double longitude, long radius, int offset)
       throws EntityNotFoundException {
 
     String url =
@@ -64,7 +64,42 @@ public class YelpService {
             + "&radius="
             + radius
             + "&sort_by=distance&limit=50&categories="
-            + categories;
+            + categories
+            + "$offset="
+            + offset;
+
+    setHeaders();
+    ResponseEntity<RestaurantResponseWrapper> response =
+        restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            new HttpEntity<>("parameters", headers),
+            RestaurantResponseWrapper.class);
+
+    RestaurantResponseWrapper wrapper = response.getBody();
+    validateResponse(wrapper);
+    return wrapper.getRestaurants();
+  }
+
+  // Finds a restaurant by name. Radius is set to the max value, offset it set to 25 to keep result
+  // object small
+  public List<Restaurant> findRestaurantByName(String name, double latitude, double longitude)
+      throws EntityNotFoundException {
+
+    String url =
+        baseUrl
+            + "/businesses/search?latitude="
+            + latitude
+            + "&longitude="
+            + longitude
+            + "&radius="
+            + 40000
+            + "&sort_by=distance&limit=50&categories="
+            + "restaurants"
+            + "$offset="
+            + 25
+            + "&term="
+            + name;
 
     setHeaders();
     ResponseEntity<RestaurantResponseWrapper> response =

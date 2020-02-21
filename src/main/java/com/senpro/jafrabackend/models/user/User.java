@@ -5,10 +5,10 @@ import com.senpro.jafrabackend.models.user.preferences.DistancePreference;
 import com.senpro.jafrabackend.models.user.preferences.PricePreference;
 import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
 import lombok.Data;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -22,4 +22,31 @@ public class User {
   private RatingPreference ratingPreference;
   private PricePreference pricePreference;
   private DistancePreference distancePreference;
+  private double latitude;
+  private double longitude;
+
+  public User(String name, String email, String username) {
+    this.name = name;
+    this.email = email;
+    this.username = username;
+    this.hiddenRestaurants = new ArrayList<>();
+    this.cuisinePreferences = new ArrayList<>();
+    this.pricePreference = new PricePreference();
+    this.ratingPreference = new RatingPreference();
+    this.distancePreference = new DistancePreference();
+    this.latitude = 0;
+    this.longitude = 0;
+  }
+  public User(String name, String email, String username, double latitude, double longitude) {
+    this.name = name;
+    this.email = email;
+    this.username = username;
+    this.hiddenRestaurants = new ArrayList<>();
+    this.cuisinePreferences = new ArrayList<>();
+    this.pricePreference = new PricePreference();
+    this.ratingPreference = new RatingPreference();
+    this.distancePreference = new DistancePreference();
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
 }

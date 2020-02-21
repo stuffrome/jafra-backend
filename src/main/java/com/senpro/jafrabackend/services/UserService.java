@@ -39,13 +39,7 @@ public class UserService {
   // Adds a user to the database
   public void addUser(String name, String email, String username)
       throws InvalidNameException, EntityExistsException {
-    User user = new User(name, email);
-    user.setUsername(username);
-    user.setHiddenRestaurants(new ArrayList<String>());
-    user.setCuisinePreferences(new ArrayList<CuisinePreference>());
-    user.setPricePreference(new PricePreference());
-    user.setRatingPreference(new RatingPreference());
-    user.setDistancePreference(new DistancePreference());
+    User user = new User(name, email, username);
     validateUser(user);
     userRepository.save(user);
   }
@@ -54,6 +48,14 @@ public class UserService {
   public User findById(String username) throws EntityNotFoundException {
     Optional<User> optionalUser = userRepository.findById(username);
     return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with username" + username ));
+  }
+
+  // Updates user's default latitude and longitude
+  public void updateLatLon(String username, double latitude, double longitude) throws EntityNotFoundException {
+    User user = findById(username);
+    user.setLatitude(latitude);
+    user.setLongitude(longitude);
+    userRepository.save(user);
   }
 
   // Validates user fields

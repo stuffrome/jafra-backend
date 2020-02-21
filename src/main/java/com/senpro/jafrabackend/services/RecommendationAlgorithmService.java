@@ -5,10 +5,8 @@ import com.senpro.jafrabackend.models.user.preferences.CuisinePreference;
 import com.senpro.jafrabackend.models.user.preferences.DistancePreference;
 import com.senpro.jafrabackend.models.user.preferences.PricePreference;
 import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
-import com.senpro.jafrabackend.models.yelp.Business;
+import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.Category;
-import com.senpro.jafrabackend.repositories.RecommendedRepository;
-import com.senpro.jafrabackend.repositories.VisitedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +21,15 @@ public class RecommendationAlgorithmService {
   @Autowired
   public RecommendationAlgorithmService() {}
 
-  public List<Business> sortRestaurants(
-      List<Business> restaurants,
+  public List<Restaurant> sortRestaurants(
+      List<Restaurant> restaurants,
       List<CuisinePreference> userCuisinePreferences,
       DistancePreference userDistancePreference,
       PricePreference userPricePreference,
       RatingPreference userRatingPreference) {
 
-    Map<Double, Business> scores = new TreeMap<Double, Business>(Collections.reverseOrder());
-    for (Business restaurant : restaurants) {
+    Map<Double, Restaurant> scores = new TreeMap<Double, Restaurant>(Collections.reverseOrder());
+    for (Restaurant restaurant : restaurants) {
       double score = 0;
       // check every cuisine preference
       for (CuisinePreference cuisinePreference : userCuisinePreferences) {
@@ -84,7 +82,7 @@ public class RecommendationAlgorithmService {
       scores.put(score, restaurant);
     }
 
-    return (List<Business>) scores.values();
+    return (List<Restaurant>) scores.values();
   }
 
   private double priceDistance(Price p1, double p2) {
