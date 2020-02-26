@@ -91,9 +91,7 @@ public class RestaurantService {
   private void saveUserRestaurants(List<Restaurant> restaurants, String username) {
     UserRestaurant userRestaurant = new UserRestaurant(username);
     List<String> restaurantIds = new ArrayList<>();
-    for (Restaurant restaurant : restaurants) {
-      restaurantIds.add(restaurant.getId());
-    }
+    restaurants.forEach(restaurant -> restaurantIds.add(restaurant.getId()));
     // If the user already has saved restaurants in the DB, it will (should) get overwritten because
     // it is using the same ID
     userRestaurantRepository.save(userRestaurant);
