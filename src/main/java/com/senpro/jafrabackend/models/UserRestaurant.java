@@ -14,11 +14,15 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "UserRestaurant")
 public class UserRestaurant {
-    @Id String username;
-    List<String> restaurantIds;
+    @Id private String username;
+    private double latitude;
+    private double longitude;
+    private List<String> restaurantIds;
 
-    public UserRestaurant(String username) {
+    public UserRestaurant(String username, double latitude, double longitude) {
         this.username = username;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.restaurantIds = new ArrayList<>();
     }
 }

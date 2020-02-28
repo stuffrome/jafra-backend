@@ -8,14 +8,18 @@ import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.repositories.RestaurantRepository;
 import com.senpro.jafrabackend.repositories.UserRestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RestaurantService {
+
+  private final double LAT_LON_ERROR_TOLERANCE = 0.0045;
 
   private YelpService apiService;
   private UserService userService;
@@ -37,24 +41,48 @@ public class RestaurantService {
     this.restaurantRepository = restaurantRepository;
   }
 
-  // Updates the users recommended restaurants
-  public void updateUserRestaurants(String username) throws EntityNotFoundException {
-    // Throws exception if not found
-    User user = userService.findById(username);
-    updateUserRestaurants("restaurants", username, user.getLatitude(), user.getLongitude());
+  // Returns the list of recommended restaurants
+  public List<Restaurant> getRecommendedRestaurants(
+      String category, String username, double latitude, double longitude)
+      throws EntityNotFoundException {
+    Optional<UserRestaurant> userRestaurant = getUserRestaurantList(username);
+
+    if (userRestaurant.isPresent()) {
+      if (validateCache(
+          userRestaurant.get().getLatitude(),
+          userRestaurant.get().getLongitude(),
+          latitude,
+          longitude)) return getUserRestaurants(userRestaurant.get().getRestaurantIds());
+      else clearCache(username, userRestaurant.get().getRestaurantIds());
+    }
+    return updateUserRestaurants(category, username, latitude, longitude);
   }
 
-  // Updates the user's recommended restaurants
-  public void updateUserRestaurants(String category, String username)
-      throws EntityNotFoundException {
-    // Throws exception if not found
-    User user = userService.findById(username);
-    updateUserRestaurants(category, username, user.getLatitude(), user.getLongitude());
+  private Optional<UserRestaurant> getUserRestaurantList(String username) {
+    return userRestaurantRepository.findById(username);
+  }
+
+  // Validates the cache of user restaurants
+  private boolean validateCache(
+          double oldLatitude, double oldLongitude, double newLatitude, double newLongitude) {
+    return Math.abs(oldLatitude - newLatitude) <= LAT_LON_ERROR_TOLERANCE
+            && Math.abs(oldLongitude - newLongitude) <= LAT_LON_ERROR_TOLERANCE;
+  }
+
+  // TODO clear restaurants from DB as well?
+  private void clearCache(String username, List<String> restaurantIds) {
+    userRestaurantRepository.deleteById(username);
+  }
+
+  // Return the list of restaurants in the database for a user
+  private List<Restaurant> getUserRestaurants(List<String> restaurantIds) {
+    List<Restaurant> restaurants = new ArrayList<>();
+    restaurantIds.forEach(id -> restaurantRepository.findById(id).ifPresent(restaurants::add));
+    return restaurants;
   }
 
   // Update's the user's recommended restaurants
-  @Async
-  public void updateUserRestaurants(
+  private List<Restaurant> updateUserRestaurants(
       String category, String username, double latitude, double longitude)
       throws EntityNotFoundException {
 
@@ -78,7 +106,8 @@ public class RestaurantService {
 
     // Saves the sorted restaurants in the DB
     saveRestaurants(sortedRestaurants);
-    saveUserRestaurants(sortedRestaurants, username);
+    saveUserRestaurants(sortedRestaurants, username, latitude, longitude);
+    return sortedRestaurants;
   }
 
   // Saves all restaurant details in the DB
@@ -88,8 +117,9 @@ public class RestaurantService {
   }
 
   // Saves the users recommended restaurants in the DB
-  private void saveUserRestaurants(List<Restaurant> restaurants, String username) {
-    UserRestaurant userRestaurant = new UserRestaurant(username);
+  private void saveUserRestaurants(
+      List<Restaurant> restaurants, String username, double latitude, double longitude) {
+    UserRestaurant userRestaurant = new UserRestaurant(username, latitude, longitude);
     List<String> restaurantIds = new ArrayList<>();
     restaurants.forEach(restaurant -> restaurantIds.add(restaurant.getId()));
     // If the user already has saved restaurants in the DB, it will (should) get overwritten because
@@ -99,19 +129,26 @@ public class RestaurantService {
 
   // Returns a list of restaurants sorted by distance
   public List<Restaurant> getRestaurants(
+      String categories,
+      String restaurantName,
+      double latitude,
+      double longitude,
+      long radius,
+      int offset)
+      throws EntityNotFoundException {
+    return apiService.getRestaurants(
+        categories, restaurantName, latitude, longitude, radius, offset);
+  }
+
+  // Returns a list of restaurants sorted by distance
+  public List<Restaurant> getRestaurants(
       String categories, double latitude, double longitude, long radius, int offset)
       throws EntityNotFoundException {
-    return apiService.getRestaurants(categories, latitude, longitude, radius, offset);
+    return getRestaurants(categories, "", latitude, longitude, radius, offset);
   }
 
   // Returns more details about a restaurant
   public RestaurantDetails getRestaurantDetails(String id) throws EntityNotFoundException {
     return apiService.getRestaurantDetails(id);
-  }
-
-  // Finds restaurants by name
-  public List<Restaurant> findByName(String restaurantName, String username) throws EntityNotFoundException {
-    User user = userService.findById(username);
-    return apiService.findRestaurantByName(restaurantName, user.getLatitude(), user.getLongitude());
   }
 }

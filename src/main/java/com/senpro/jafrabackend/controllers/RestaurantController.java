@@ -4,7 +4,6 @@ import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.services.RestaurantService;
-import com.senpro.jafrabackend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,39 +18,33 @@ import java.util.List;
 @RequestMapping("/restaurants")
 public class RestaurantController {
 
+  private static final String DEFAULT_CATEGORY = "restaurants";
+  private static final String DEFAULT_RADIUS = "40000";
+
   private RestaurantService restaurantService;
-  private UserService userService;
 
   @Autowired
-  public RestaurantController(RestaurantService restaurantService, UserService userService) {
+  public RestaurantController(RestaurantService restaurantService) {
     this.restaurantService = restaurantService;
-    this.userService = userService;
   }
 
   @GetMapping
   public ResponseEntity<List<Restaurant>> getRestaurants(
-      @RequestParam(required = false, defaultValue = "restaurants") String categories,
+      @RequestParam(required = false, defaultValue = DEFAULT_CATEGORY) String categories,
+      @RequestParam(required = false) String restaurantName,
       @RequestParam String latitude,
       @RequestParam String longitude,
-      @RequestParam String radius)
+      @RequestParam(required = false, defaultValue = DEFAULT_RADIUS) String radius)
       throws EntityNotFoundException {
     return ResponseEntity.status(HttpStatus.OK)
         .body(
             restaurantService.getRestaurants(
                 categories,
+                restaurantName,
                 Double.parseDouble(latitude),
                 Double.parseDouble(longitude),
                 Long.parseLong(radius),
                 0));
-  }
-
-  // Returns a list of restaurants that contain the name passed in
-  @GetMapping("/search")
-  public ResponseEntity<List<Restaurant>> findRestaurant(
-      @RequestParam String restaurantName, @RequestParam String username)
-      throws EntityNotFoundException {
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(restaurantService.findByName(restaurantName, username));
   }
 
   @GetMapping("/details")
@@ -62,21 +55,17 @@ public class RestaurantController {
 
   // Updates users recommended restaurants. If latitude and longitude are passed in, the users
   // latitude and longitude will be updated
-  @GetMapping("/user")
-  public ResponseEntity<String> updateUserRestaurants(
-      @RequestParam(required = false, defaultValue = "restaurants") String categories,
-      @RequestParam(required = false, defaultValue = "-1") String latitude,
-      @RequestParam(required = false, defaultValue = "-1") String longitude,
+  @GetMapping("/recommended")
+  public ResponseEntity<List<Restaurant>> getRecommendedRestaurants(
+      @RequestParam(required = false, defaultValue = DEFAULT_CATEGORY) String categories,
+      @RequestParam String latitude,
+      @RequestParam String longitude,
       @RequestParam String username)
       throws EntityNotFoundException {
-    if (latitude.equals("-1") || longitude.equals("-1"))
-      restaurantService.updateUserRestaurants(categories, username);
-    else {
-      userService.updateLatLon(
-          username, Double.parseDouble(latitude), Double.parseDouble(longitude));
-      restaurantService.updateUserRestaurants(
-          categories, username, Double.parseDouble(latitude), Double.parseDouble(longitude));
-    }
-    return ResponseEntity.ok("Updated");
+
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            restaurantService.getRecommendedRestaurants(
+                categories, username, Double.parseDouble(latitude), Double.parseDouble(longitude)));
   }
 }

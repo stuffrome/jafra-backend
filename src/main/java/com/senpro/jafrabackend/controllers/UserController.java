@@ -38,16 +38,10 @@ public class UserController {
   // Adds a user
   @PostMapping
   public ResponseEntity<String> addUser(
-      @RequestParam String name,
-      @RequestParam String email,
-      @RequestParam String username,
-      @RequestParam(required = false, defaultValue = "-1") String latitude,
-      @RequestParam(required = false, defaultValue = "-1") String longitude)
+      @RequestParam String name, @RequestParam String email, @RequestParam String username)
       throws InvalidNameException, EntityExistsException, EntityNotFoundException {
     userService.addUser(name, email, username);
-    if (latitude.equals("-1") || longitude.equals("-1"))
-      userService.updateLatLon(
-          username, Double.parseDouble(latitude), Double.parseDouble(longitude));
+
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
   }
 

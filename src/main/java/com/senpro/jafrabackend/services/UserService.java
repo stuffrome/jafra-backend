@@ -4,16 +4,10 @@ import com.senpro.jafrabackend.exceptions.EntityExistsException;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.exceptions.InvalidNameException;
 import com.senpro.jafrabackend.models.user.User;
-import com.senpro.jafrabackend.models.user.preferences.CuisinePreference;
-import com.senpro.jafrabackend.models.user.preferences.DistancePreference;
-import com.senpro.jafrabackend.models.user.preferences.PricePreference;
-import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
 import com.senpro.jafrabackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -47,15 +41,8 @@ public class UserService {
   // Finds a user by ID
   public User findById(String username) throws EntityNotFoundException {
     Optional<User> optionalUser = userRepository.findById(username);
-    return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with username" + username ));
-  }
-
-  // Updates user's default latitude and longitude
-  public void updateLatLon(String username, double latitude, double longitude) throws EntityNotFoundException {
-    User user = findById(username);
-    user.setLatitude(latitude);
-    user.setLongitude(longitude);
-    userRepository.save(user);
+    return optionalUser.orElseThrow(
+        () -> new EntityNotFoundException("User with username" + username));
   }
 
   // Validates user fields
