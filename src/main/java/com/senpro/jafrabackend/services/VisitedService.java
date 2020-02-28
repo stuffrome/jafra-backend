@@ -36,8 +36,6 @@ public class VisitedService {
     visited.setReviewDate(new Date());
     validateVisited(visited);
     visitedRepository.save(visited);
-    // Update the user's recommended restaurants whenever preferences change
-    restaurantService.updateUserRestaurants(username);
   }
 
   public void updateVisitedRestaurant(String username, String restaurantId, float userRating)
@@ -52,8 +50,6 @@ public class VisitedService {
     validateUpdate(visited);
     visitedRepository.deleteById(visited.getId().toString());
     visitedRepository.save(visited);
-    // Update the user's recommended restaurants whenever preferences change
-    restaurantService.updateUserRestaurants(username);
   }
   // Returns all users in the database
   public List<VisitedRestaurant> getVisitedRestaurants() throws EntityNotFoundException {
