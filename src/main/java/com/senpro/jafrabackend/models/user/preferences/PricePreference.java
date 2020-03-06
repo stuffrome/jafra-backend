@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class PricePreference {
-  // ranges from 1 to 5, moves towards the price of positively reviewed restaurants
-  private float preferenceWeight = 3;
+  // ranges from 1 to 4, moves towards the price of positively reviewed restaurants
+  private float preferenceWeight = 2;
 }
