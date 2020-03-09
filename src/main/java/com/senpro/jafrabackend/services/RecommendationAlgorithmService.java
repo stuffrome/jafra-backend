@@ -14,10 +14,10 @@ import java.util.*;
 
 @Service
 public class RecommendationAlgorithmService {
-  private final double CUISINE_WEIGHT = 1.5;
+  private final double CUISINE_WEIGHT = 1.2;
   private final double DISTANCE_WEIGHT = 5;
-  private final double PRICE_WEIGHT = 2;
-  private final double RATING_WEIGHT = 20;
+  private final double PRICE_WEIGHT = 5;
+  private final double RATING_WEIGHT = 14;
 
   @Autowired
   public RecommendationAlgorithmService() {}
@@ -145,7 +145,7 @@ public class RecommendationAlgorithmService {
   }
 
   private double priceDistance(Price p1, double p2) {
-    double price1 = (double) p1.ordinal();
+    double price1 = (double) p1.ordinal() + 1.0;
     return Math.abs(price1 - p2);
   }
 }
