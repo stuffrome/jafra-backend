@@ -88,7 +88,7 @@ public class RestaurantService {
 
     // Throws exception if not found
     User user = userService.findById(username);
-    List<Restaurant> rawRestaurants = new ArrayList<>();
+    List<Restaurant> rawRestaurants = new ArrayList<Restaurant>();
 
     // Gets the first 150 restaurants
     rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 0));

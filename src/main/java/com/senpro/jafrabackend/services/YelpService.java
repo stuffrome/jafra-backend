@@ -65,7 +65,7 @@ public class YelpService {
                     + radius
                     + "&sort_by=distance&limit=50&categories="
                     + categories
-                    + "$offset="
+                    + "&offset="
                     + offset;
 
     if (!restaurantName.equals("")) url = url.concat("&term=" + restaurantName);
