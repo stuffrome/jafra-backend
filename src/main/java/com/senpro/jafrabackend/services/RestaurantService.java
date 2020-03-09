@@ -122,6 +122,7 @@ public class RestaurantService {
     UserRestaurant userRestaurant = new UserRestaurant(username, latitude, longitude);
     List<String> restaurantIds = new ArrayList<>();
     restaurants.forEach(restaurant -> restaurantIds.add(restaurant.getId()));
+    userRestaurant.setRestaurantIds(restaurantIds);
     // If the user already has saved restaurants in the DB, it will (should) get overwritten because
     // it is using the same ID
     userRestaurantRepository.save(userRestaurant);
