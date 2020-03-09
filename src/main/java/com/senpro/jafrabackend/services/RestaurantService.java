@@ -8,7 +8,6 @@ import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.repositories.RestaurantRepository;
 import com.senpro.jafrabackend.repositories.UserRestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +51,11 @@ public class RestaurantService {
           userRestaurant.get().getLatitude(),
           userRestaurant.get().getLongitude(),
           latitude,
-          longitude)) return getUserRestaurants(userRestaurant.get().getRestaurantIds());
-      else clearCache(username, userRestaurant.get().getRestaurantIds());
+          longitude)) {
+        return sortRestaurants(
+            getUserRestaurants(userRestaurant.get().getRestaurantIds()),
+            userService.findById(username));
+      } else clearCache(username, userRestaurant.get().getRestaurantIds());
     }
     return updateUserRestaurants(category, username, latitude, longitude);
   }
@@ -64,9 +66,9 @@ public class RestaurantService {
 
   // Validates the cache of user restaurants
   private boolean validateCache(
-          double oldLatitude, double oldLongitude, double newLatitude, double newLongitude) {
+      double oldLatitude, double oldLongitude, double newLatitude, double newLongitude) {
     return Math.abs(oldLatitude - newLatitude) <= LAT_LON_ERROR_TOLERANCE
-            && Math.abs(oldLongitude - newLongitude) <= LAT_LON_ERROR_TOLERANCE;
+        && Math.abs(oldLongitude - newLongitude) <= LAT_LON_ERROR_TOLERANCE;
   }
 
   // TODO clear restaurants from DB as well?
@@ -81,6 +83,24 @@ public class RestaurantService {
     return restaurants;
   }
 
+  private List<Restaurant> sortRestaurants(List<Restaurant> restaurants, User user) {
+    // Sorts the sorted restaurants
+    return algorithmService.sortRestaurants(
+        restaurants,
+        user.getCuisinePreferences(),
+        // user.getDistancePreference(),
+        user.getPricePreference(),
+        user.getRatingPreference());
+  }
+
+  @Async
+  public void saveRestaurants(
+      List<Restaurant> restaurants, String username, double latitude, double longitude) {
+    // Saves the sorted restaurants in the DB
+    saveRestaurants(restaurants);
+    saveUserRestaurants(restaurants, username, latitude, longitude);
+  }
+
   // Update's the user's recommended restaurants
   private List<Restaurant> updateUserRestaurants(
       String category, String username, double latitude, double longitude)
@@ -88,25 +108,20 @@ public class RestaurantService {
 
     // Throws exception if not found
     User user = userService.findById(username);
-    List<Restaurant> rawRestaurants = new ArrayList<Restaurant>();
+    List<Restaurant> rawRestaurants = new ArrayList<>();
 
     // Gets the first 150 restaurants
     rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 0));
     rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 50));
     rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 100));
 
+    // TODO make yelp calls ASYNC and WAIT for completion
+
     // Sorts the restaurants
-    List<Restaurant> sortedRestaurants =
-        algorithmService.sortRestaurants(
-            rawRestaurants,
-            user.getCuisinePreferences(),
-            //user.getDistancePreference(),
-            user.getPricePreference(),
-            user.getRatingPreference());
+    List<Restaurant> sortedRestaurants = sortRestaurants(rawRestaurants, user);
 
     // Saves the sorted restaurants in the DB
-    saveRestaurants(sortedRestaurants);
-    saveUserRestaurants(sortedRestaurants, username, latitude, longitude);
+    saveRestaurants(sortedRestaurants, username, latitude, longitude);
     return sortedRestaurants;
   }
 
