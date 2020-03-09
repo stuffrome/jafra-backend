@@ -32,14 +32,19 @@ public class RecommendationAlgorithmService {
     Map<Double, Restaurant> scores = new TreeMap<Double, Restaurant>(Collections.reverseOrder());
     Map<Restaurant, List<Double>> weightsDebug = new HashMap<Restaurant, List<Double>>();
 
-    System.out.println("User Preferences:\n\tPrice Preference: " + userPricePreference.getPreferenceWeight() + "\n\tRating Preference: " + userRatingPreference.getPreferenceWeight() + "\n\tCuisine Preferences:");
-    for (CuisinePreference cp: userCuisinePreferences) {
-        System.out.println("\t\t" + cp.getCuisineAlias() + ": " + cp.getPreferenceWeight());
+    System.out.println(
+        "User Preferences:\n\tPrice Preference: "
+            + userPricePreference.getPreferenceWeight()
+            + "\n\tRating Preference: "
+            + userRatingPreference.getPreferenceWeight()
+            + "\n\tCuisine Preferences:");
+    for (CuisinePreference cp : userCuisinePreferences) {
+      System.out.println("\t\t" + cp.getCuisineAlias() + ": " + cp.getPreferenceWeight());
     }
     System.out.println("Ranking " + restaurants.size() + " restaurants:");
     for (Restaurant restaurant : restaurants) {
       List<Double> weights = new ArrayList<Double>();
-      //System.out.println("testing: " + restaurant.getAlias());
+      // System.out.println("testing: " + restaurant.getAlias());
       double score = 0;
       // check every cuisine preference
       double cuisineScore = 0;
@@ -74,52 +79,66 @@ public class RecommendationAlgorithmService {
         double priceScore = (priceProp * priceProp) * PRICE_WEIGHT;
         score += priceScore;
         weights.add(weights.size(), priceScore);
-      }
-      else{
+      } else {
         weights.add(weights.size(), 0.0);
       }
 
-      //rating weight is affected by the number of reviews
-      double numReviewsAdjustedWeight = RATING_WEIGHT * (Math.pow(restaurant.getReviewCount(), 1/4)/5);
+      if (restaurant.getReviewCount() >= 4) {
+        // rating weight is affected by the number of reviews
+        double numReviewsAdjustedWeight =
+            RATING_WEIGHT * (Math.pow(1.0 * restaurant.getReviewCount(), 1.0 / 4.0) / 5.0);
 
-      // adds rating factors to score
-      // if rating lower than your preferred rating, proportionally add a lower score (closer to
-      // preferred rating is higher)
-      // if equal, just add weight,
-      // if higher, proportionally add twice the weight
-      if (restaurant.getRating() != null) {
-        if (restaurant.getRating() < userRatingPreference.getPreferenceWeight()) {
-          double ratingProp = restaurant.getRating() / userRatingPreference.getPreferenceWeight();
-          double ratingScore = (ratingProp * ratingProp) * numReviewsAdjustedWeight;
-          score += ratingScore;
-          weights.add(weights.size(), ratingScore);
-        } else if (restaurant.getRating() == userRatingPreference.getPreferenceWeight()) {
-          score += numReviewsAdjustedWeight;
-          weights.add(weights.size(), numReviewsAdjustedWeight);
+        // adds rating factors to score
+        // if rating lower than your preferred rating, proportionally add a lower score (closer to
+        // preferred rating is higher)
+        // if equal, just add weight,
+        // if higher, proportionally add twice the weight
+        if (restaurant.getRating() != null) {
+          if (restaurant.getRating() < userRatingPreference.getPreferenceWeight()) {
+            double ratingProp = restaurant.getRating() / userRatingPreference.getPreferenceWeight();
+            double ratingScore = (ratingProp * ratingProp) * numReviewsAdjustedWeight;
+            score += ratingScore;
+            weights.add(weights.size(), ratingScore);
+          } else if (restaurant.getRating() == userRatingPreference.getPreferenceWeight()) {
+            score += numReviewsAdjustedWeight;
+            weights.add(weights.size(), numReviewsAdjustedWeight);
+          } else {
+            double ratingProp =
+                1.0
+                    - ((5.01 - restaurant.getRating())
+                        / (5.01 - userRatingPreference.getPreferenceWeight()));
+            double ratingScore = (ratingProp * ratingProp) * (numReviewsAdjustedWeight * 2);
+            score += ratingScore;
+            weights.add(weights.size(), ratingScore);
+          }
         } else {
-          double ratingProp =
-              1.0
-                  - ((5.01 - restaurant.getRating())
-                      / (5.01 - userRatingPreference.getPreferenceWeight()));
-          double ratingScore = (ratingProp * ratingProp) * (numReviewsAdjustedWeight * 2);
-          score += ratingScore;
-          weights.add(weights.size(), ratingScore);
+          weights.add(weights.size(), 0.0);
         }
+      } else {
+        weights.add(weights.size(), 0.0);
       }
-      //System.out.println("Score :" + score);
-        while(scores.containsKey(score)){
-            score -= 0.000001;
-        }
+      // System.out.println("Score :" + score);
+      while (scores.containsKey(score)) {
+        score -= 0.000001;
+      }
       scores.put(score, restaurant);
-        weightsDebug.put(restaurant, weights);
+      weightsDebug.put(restaurant, weights);
     }
 
     int i = 1;
     for (double s : scores.keySet()) {
-        System.out.println("" + i + ": " + s + " = " + scores.get(s).getName());
-        List<Double> weights = weightsDebug.get(scores.get(s));
-        System.out.println("\tCuisine Weight: " + weights.get(0) + ", Distance Weight: " + weights.get(1) + ", Price Weight: " + weights.get(2) + ", Rating Weight: " + weights.get(3));
-        i++;
+      System.out.println("" + i + ": " + s + " = " + scores.get(s).getName());
+      List<Double> weights = weightsDebug.get(scores.get(s));
+      System.out.println(
+          "\tCuisine Weight: "
+              + weights.get(0)
+              + ", Distance Weight: "
+              + weights.get(1)
+              + ", Price Weight: "
+              + weights.get(2)
+              + ", Rating Weight: "
+              + weights.get(3));
+      i++;
     }
     List<Restaurant> scoredRests = new ArrayList<Restaurant>(scores.values());
     return scoredRests;
