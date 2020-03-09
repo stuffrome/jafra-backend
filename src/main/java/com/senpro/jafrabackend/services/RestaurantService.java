@@ -9,11 +9,13 @@ import com.senpro.jafrabackend.repositories.RestaurantRepository;
 import com.senpro.jafrabackend.repositories.UserRestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Future;
 
 @Service
 public class RestaurantService {
@@ -108,17 +110,30 @@ public class RestaurantService {
 
     // Throws exception if not found
     User user = userService.findById(username);
-    List<Restaurant> rawRestaurants = new ArrayList<>();
+    List<Restaurant> allRawRestaurants = new ArrayList<>();
+    //    List<Restaurant> rawRestaurants1 = new ArrayList<>();
+    Future<List<Restaurant>> rawRestaurants2 =
+        getRestaurants(category, latitude, longitude, 10000, 50);
+    Future<List<Restaurant>> rawRestaurants3 =
+        getRestaurants(category, latitude, longitude, 10000, 100);
+    Future<List<Restaurant>> rawRestaurants1 =
+        getRestaurants(category, latitude, longitude, 10000, 0);
 
-    // Gets the first 150 restaurants
-    rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 0));
-    rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 50));
-    rawRestaurants.addAll(getRestaurants(category, latitude, longitude, 10000, 100));
-
-    // TODO make yelp calls ASYNC and WAIT for completion
+    while (true) {
+      if (rawRestaurants1.isDone() && rawRestaurants2.isDone() && rawRestaurants3.isDone()) {
+        try {
+          allRawRestaurants.addAll(rawRestaurants1.get());
+          allRawRestaurants.addAll(rawRestaurants2.get());
+          allRawRestaurants.addAll(rawRestaurants3.get());
+          break;
+        } catch (Exception e) {
+          System.out.println("error" + e);
+        }
+      }
+    }
 
     // Sorts the restaurants
-    List<Restaurant> sortedRestaurants = sortRestaurants(rawRestaurants, user);
+    List<Restaurant> sortedRestaurants = sortRestaurants(allRawRestaurants, user);
 
     // Saves the sorted restaurants in the DB
     saveRestaurants(sortedRestaurants, username, latitude, longitude);
@@ -157,10 +172,12 @@ public class RestaurantService {
   }
 
   // Returns a list of restaurants sorted by distance
-  public List<Restaurant> getRestaurants(
+  @Async
+  public Future<List<Restaurant>> getRestaurants(
       String categories, double latitude, double longitude, long radius, int offset)
       throws EntityNotFoundException {
-    return getRestaurants(categories, "", latitude, longitude, radius, offset);
+    return new AsyncResult<List<Restaurant>>(
+        getRestaurants(categories, "", latitude, longitude, radius, offset));
   }
 
   // Returns more details about a restaurant
