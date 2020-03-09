@@ -100,7 +100,7 @@ public class RestaurantService {
         algorithmService.sortRestaurants(
             rawRestaurants,
             user.getCuisinePreferences(),
-            user.getDistancePreference(),
+            //user.getDistancePreference(),
             user.getPricePreference(),
             user.getRatingPreference());
 

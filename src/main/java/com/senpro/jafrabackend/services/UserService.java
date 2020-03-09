@@ -38,6 +38,11 @@ public class UserService {
     userRepository.save(user);
   }
 
+  public void updateUser(User newUser){
+    userRepository.deleteById(newUser.getUsername());
+    userRepository.save(newUser);
+  }
+
   // Finds a user by ID
   public User findById(String username) throws EntityNotFoundException {
     Optional<User> optionalUser = userRepository.findById(username);

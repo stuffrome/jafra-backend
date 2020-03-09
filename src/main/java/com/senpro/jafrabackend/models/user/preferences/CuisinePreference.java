@@ -8,5 +8,5 @@ public class CuisinePreference {
   private String cuisineAlias;
   // preference weight is a float that increases if the user leaves a positive review on a
   // restaurant in this category
-  private float preferenceWeight;
+  private double preferenceWeight;
 }

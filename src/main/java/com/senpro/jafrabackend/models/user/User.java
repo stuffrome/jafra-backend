@@ -21,7 +21,7 @@ public class User {
   private List<CuisinePreference> cuisinePreferences;
   private RatingPreference ratingPreference;
   private PricePreference pricePreference;
-  private DistancePreference distancePreference;
+  //private DistancePreference distancePreference;
 
   public User(String name, String email, String username) {
     this.name = name;
@@ -31,6 +31,6 @@ public class User {
     this.cuisinePreferences = new ArrayList<>();
     this.pricePreference = new PricePreference();
     this.ratingPreference = new RatingPreference();
-    this.distancePreference = new DistancePreference();
+    //this.distancePreference = new DistancePreference();
   }
 }
