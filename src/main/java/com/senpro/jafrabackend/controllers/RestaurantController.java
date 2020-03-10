@@ -1,6 +1,7 @@
 package com.senpro.jafrabackend.controllers;
 
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
+import com.senpro.jafrabackend.models.RecommendedRestaurantResponse;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.services.RestaurantService;
@@ -56,16 +57,23 @@ public class RestaurantController {
   // Updates users recommended restaurants. If latitude and longitude are passed in, the users
   // latitude and longitude will be updated
   @GetMapping("/recommended")
-  public ResponseEntity<List<Restaurant>> getRecommendedRestaurants(
+  public ResponseEntity<RecommendedRestaurantResponse> getRecommendedRestaurants(
       @RequestParam(required = false, defaultValue = DEFAULT_CATEGORY) String categories,
       @RequestParam String latitude,
       @RequestParam String longitude,
-      @RequestParam String username)
+      @RequestParam String username,
+      @RequestParam String pageNumber,
+      @RequestParam String pageSize)
       throws EntityNotFoundException {
 
     return ResponseEntity.status(HttpStatus.OK)
         .body(
             restaurantService.getRecommendedRestaurants(
-                categories, username, Double.parseDouble(latitude), Double.parseDouble(longitude)));
+                categories,
+                username,
+                Double.parseDouble(latitude),
+                Double.parseDouble(longitude),
+                Integer.parseInt(pageNumber),
+                Integer.parseInt(pageSize)));
   }
 }

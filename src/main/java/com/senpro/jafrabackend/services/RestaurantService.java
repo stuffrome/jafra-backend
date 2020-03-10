@@ -1,6 +1,7 @@
 package com.senpro.jafrabackend.services;
 
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
+import com.senpro.jafrabackend.models.RecommendedRestaurantResponse;
 import com.senpro.jafrabackend.models.UserRestaurant;
 import com.senpro.jafrabackend.models.user.User;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
@@ -21,6 +22,7 @@ import java.util.concurrent.Future;
 public class RestaurantService {
 
   private final double LAT_LON_ERROR_TOLERANCE = 0.0045;
+  private final int DEFAULT_PAGE_SIZE = 10;
 
   private YelpService apiService;
   private UserService userService;
@@ -43,8 +45,13 @@ public class RestaurantService {
   }
 
   // Returns the list of recommended restaurants
-  public List<Restaurant> getRecommendedRestaurants(
-      String category, String username, double latitude, double longitude)
+  public RecommendedRestaurantResponse getRecommendedRestaurants(
+      String category,
+      String username,
+      double latitude,
+      double longitude,
+      int pageNumber,
+      int pageSize)
       throws EntityNotFoundException {
     Optional<UserRestaurant> userRestaurant = getUserRestaurantList(username);
 
@@ -54,12 +61,41 @@ public class RestaurantService {
           userRestaurant.get().getLongitude(),
           latitude,
           longitude)) {
-        return sortRestaurants(
-            getUserRestaurants(userRestaurant.get().getRestaurantIds()),
-            userService.findById(username));
+        return getSortedRestaurantsFromCache(
+            userRestaurant.get().getRestaurantIds(), username, pageNumber, pageSize);
       } else clearCache(username, userRestaurant.get().getRestaurantIds());
     }
-    return updateUserRestaurants(category, username, latitude, longitude);
+    List<Restaurant> restaurants = updateUserRestaurants(category, username, latitude, longitude);
+    return paginateRestaurants(restaurants, pageSize, pageNumber);
+  }
+
+  private RecommendedRestaurantResponse getSortedRestaurantsFromCache(
+      List<String> restaurantIds, String username, int pageNumber, int pageSize)
+      throws EntityNotFoundException {
+
+    List<Restaurant> restaurants = getUserRestaurants(restaurantIds);
+    List<Restaurant> sortedRestaurants =
+        sortRestaurants(restaurants, userService.findById(username));
+    return paginateRestaurants(sortedRestaurants, pageSize, pageNumber);
+  }
+
+  private RecommendedRestaurantResponse paginateRestaurants(
+      List<Restaurant> restaurants, int pageSize, int pageNumber) {
+    List<Restaurant> pagedRestaurants = new ArrayList<>();
+    if (!validatePageParameters(pageSize, pageNumber, restaurants.size())) {
+      pageSize = DEFAULT_PAGE_SIZE;
+      pageNumber = 1;
+    }
+    for (int i = 0; i < restaurants.size(); ++i) {
+      if (i >= (pageNumber - 1) * pageSize && i < pageNumber * pageSize)
+        pagedRestaurants.add(restaurants.get(i));
+    }
+    return new RecommendedRestaurantResponse(
+        pagedRestaurants, pageSize, pageNumber, restaurants.size());
+  }
+
+  private boolean validatePageParameters(int pageSize, int pageNumber, int resultSize) {
+    return pageNumber > 0 && pageSize > 0 && pageNumber <= (pageSize / resultSize);
   }
 
   private Optional<UserRestaurant> getUserRestaurantList(String username) {
@@ -73,9 +109,9 @@ public class RestaurantService {
         && Math.abs(oldLongitude - newLongitude) <= LAT_LON_ERROR_TOLERANCE;
   }
 
-  // TODO clear restaurants from DB as well?
   private void clearCache(String username, List<String> restaurantIds) {
     userRestaurantRepository.deleteById(username);
+    restaurantIds.forEach(rId -> restaurantRepository.deleteById(rId));
   }
 
   // Return the list of restaurants in the database for a user
@@ -111,13 +147,13 @@ public class RestaurantService {
     // Throws exception if not found
     User user = userService.findById(username);
     List<Restaurant> allRawRestaurants = new ArrayList<>();
-    //    List<Restaurant> rawRestaurants1 = new ArrayList<>();
+
+    Future<List<Restaurant>> rawRestaurants1 =
+        getRestaurants(category, latitude, longitude, 10000, 0);
     Future<List<Restaurant>> rawRestaurants2 =
         getRestaurants(category, latitude, longitude, 10000, 50);
     Future<List<Restaurant>> rawRestaurants3 =
         getRestaurants(category, latitude, longitude, 10000, 100);
-    Future<List<Restaurant>> rawRestaurants1 =
-        getRestaurants(category, latitude, longitude, 10000, 0);
 
     while (true) {
       if (rawRestaurants1.isDone() && rawRestaurants2.isDone() && rawRestaurants3.isDone()) {
@@ -176,8 +212,7 @@ public class RestaurantService {
   public Future<List<Restaurant>> getRestaurants(
       String categories, double latitude, double longitude, long radius, int offset)
       throws EntityNotFoundException {
-    return new AsyncResult<List<Restaurant>>(
-        getRestaurants(categories, "", latitude, longitude, radius, offset));
+    return new AsyncResult<>(getRestaurants(categories, "", latitude, longitude, radius, offset));
   }
 
   // Returns more details about a restaurant
