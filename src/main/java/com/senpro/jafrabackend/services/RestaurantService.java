@@ -23,6 +23,7 @@ public class RestaurantService {
 
   private final double LAT_LON_ERROR_TOLERANCE = 0.0045;
   private final int DEFAULT_PAGE_SIZE = 10;
+  private final int NUM_YELP_CALLS = 3;
 
   private YelpService apiService;
   private UserService userService;
@@ -95,7 +96,7 @@ public class RestaurantService {
   }
 
   private boolean validatePageParameters(int pageSize, int pageNumber, int resultSize) {
-    return pageNumber > 0 && pageSize > 0 && pageNumber <= (pageSize / resultSize);
+    return pageNumber > 0 && pageSize > 0 && pageNumber <= (resultSize / pageSize);
   }
 
   private Optional<UserRestaurant> getUserRestaurantList(String username) {
@@ -148,19 +149,31 @@ public class RestaurantService {
     User user = userService.findById(username);
     List<Restaurant> allRawRestaurants = new ArrayList<>();
 
+    List<Future<List<Restaurant>>> rawRestaurants = new ArrayList<>();
+
+    for(int i = 0; i < NUM_YELP_CALLS; i++){
+      rawRestaurants.add(getRestaurants(category, latitude, longitude, 10000, 50 * i));
+    }
+  /*
     Future<List<Restaurant>> rawRestaurants1 =
         getRestaurants(category, latitude, longitude, 10000, 0);
     Future<List<Restaurant>> rawRestaurants2 =
         getRestaurants(category, latitude, longitude, 10000, 50);
     Future<List<Restaurant>> rawRestaurants3 =
-        getRestaurants(category, latitude, longitude, 10000, 100);
+        getRestaurants(category, latitude, longitude, 10000, 100); */
 
     while (true) {
-      if (rawRestaurants1.isDone() && rawRestaurants2.isDone() && rawRestaurants3.isDone()) {
+      boolean done = true;
+      for(int i = 0; i < NUM_YELP_CALLS; i++){
+        if(!rawRestaurants.get(i).isDone()){
+          done = false;
+        }
+      }
+      if (done) {
         try {
-          allRawRestaurants.addAll(rawRestaurants1.get());
-          allRawRestaurants.addAll(rawRestaurants2.get());
-          allRawRestaurants.addAll(rawRestaurants3.get());
+          for(int i = 0; i < NUM_YELP_CALLS; i++){
+            allRawRestaurants.addAll(rawRestaurants.get(i).get());
+          }
           break;
         } catch (Exception e) {
           System.out.println("error" + e);

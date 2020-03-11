@@ -44,6 +44,7 @@ public class RecommendationAlgorithmService {
     System.out.println("Ranking " + restaurants.size() + " restaurants:");
     for (Restaurant restaurant : restaurants) {
       List<Double> weights = new ArrayList<Double>();
+      boolean crapRestaurant = true;
       // System.out.println("testing: " + restaurant.getAlias());
       double score = 0;
       // check every cuisine preference
@@ -73,6 +74,7 @@ public class RecommendationAlgorithmService {
       // adds price factors to the score
       // higher if prices are similar
       if (restaurant.getPrice() != null) {
+        crapRestaurant = false;
         double priceDist =
             priceDistance(restaurant.getPrice(), userPricePreference.getPreferenceWeight());
         double priceProp = 1.0 - priceDist / 3.0;
@@ -94,6 +96,7 @@ public class RecommendationAlgorithmService {
         // if equal, just add weight,
         // if higher, proportionally add twice the weight
         if (restaurant.getRating() != null) {
+          crapRestaurant = false;
           if (restaurant.getRating() < userRatingPreference.getPreferenceWeight()) {
             double ratingProp = restaurant.getRating() / userRatingPreference.getPreferenceWeight();
             double ratingScore = (ratingProp * ratingProp) * numReviewsAdjustedWeight;
@@ -121,8 +124,10 @@ public class RecommendationAlgorithmService {
       while (scores.containsKey(score)) {
         score -= 0.000001;
       }
-      scores.put(score, restaurant);
-      weightsDebug.put(restaurant, weights);
+      if (!crapRestaurant) {
+        scores.put(score, restaurant);
+        weightsDebug.put(restaurant, weights);
+      }
     }
 
     int i = 1;
