@@ -2,7 +2,6 @@ package com.senpro.jafrabackend.services;
 
 import com.senpro.jafrabackend.enums.Price;
 import com.senpro.jafrabackend.models.user.preferences.CuisinePreference;
-import com.senpro.jafrabackend.models.user.preferences.DistancePreference;
 import com.senpro.jafrabackend.models.user.preferences.PricePreference;
 import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
@@ -18,9 +17,6 @@ public class RecommendationAlgorithmService {
   private final double DISTANCE_WEIGHT = 5;
   private final double PRICE_WEIGHT = 5;
   private final double RATING_WEIGHT = 14;
-
-  @Autowired
-  public RecommendationAlgorithmService() {}
 
   public List<Restaurant> sortRestaurants(
       List<Restaurant> restaurants,

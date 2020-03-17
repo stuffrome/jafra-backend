@@ -22,8 +22,9 @@ import java.util.List;
 @RequestMapping("/visited")
 @CrossOrigin(origins = "https://jafra.herokuapp.com")
 public class VisitedController {
-  VisitedService visitedService;
-  UserService userService;
+
+  private VisitedService visitedService;
+  private UserService userService;
 
   @Autowired
   public VisitedController(VisitedService visitedService, UserService userService) {

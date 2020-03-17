@@ -1,7 +1,6 @@
 package com.senpro.jafrabackend.models.user;
 
 import com.senpro.jafrabackend.models.user.preferences.CuisinePreference;
-import com.senpro.jafrabackend.models.user.preferences.DistancePreference;
 import com.senpro.jafrabackend.models.user.preferences.PricePreference;
 import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
 import lombok.Data;

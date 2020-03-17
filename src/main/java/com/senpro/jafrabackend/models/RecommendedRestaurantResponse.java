@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class RecommendedRestaurantResponse {
-    List<Restaurant> restaurants;
-    int pageSize;
-    int pageNumber;
-    int numResults;
+    private List<Restaurant> restaurants;
+    private int pageSize;
+    private int pageNumber;
+    private int numResults;
 }
