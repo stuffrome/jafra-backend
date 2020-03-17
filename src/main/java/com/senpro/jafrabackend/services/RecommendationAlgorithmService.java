@@ -6,7 +6,6 @@ import com.senpro.jafrabackend.models.user.preferences.PricePreference;
 import com.senpro.jafrabackend.models.user.preferences.RatingPreference;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.Category;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

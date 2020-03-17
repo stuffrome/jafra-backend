@@ -81,8 +81,12 @@ public class RestaurantService {
   }
 
   private RecommendedRestaurantResponse paginateRestaurants(
-      List<Restaurant> restaurants, int pageSize, int pageNumber) {
+      List<Restaurant> restaurants, int pSize, int pNumber) {
     List<Restaurant> pagedRestaurants = new ArrayList<>();
+
+    int pageSize = pSize;
+    int pageNumber = pNumber;
+
     if (!validatePageParameters(pageSize, pageNumber, restaurants.size())) {
       pageSize = DEFAULT_PAGE_SIZE;
       pageNumber = 1;
@@ -151,10 +155,10 @@ public class RestaurantService {
 
     List<Future<List<Restaurant>>> rawRestaurants = new ArrayList<>();
 
-    for(int i = 0; i < NUM_YELP_CALLS; i++){
+    for (int i = 0; i < NUM_YELP_CALLS; i++) {
       rawRestaurants.add(getRestaurants(category, latitude, longitude, 10000, 50 * i));
     }
-  /*
+    /*
     Future<List<Restaurant>> rawRestaurants1 =
         getRestaurants(category, latitude, longitude, 10000, 0);
     Future<List<Restaurant>> rawRestaurants2 =
@@ -164,14 +168,14 @@ public class RestaurantService {
 
     while (true) {
       boolean done = true;
-      for(int i = 0; i < NUM_YELP_CALLS; i++){
-        if(!rawRestaurants.get(i).isDone()){
+      for (int i = 0; i < NUM_YELP_CALLS; i++) {
+        if (!rawRestaurants.get(i).isDone()) {
           done = false;
         }
       }
       if (done) {
         try {
-          for(int i = 0; i < NUM_YELP_CALLS; i++){
+          for (int i = 0; i < NUM_YELP_CALLS; i++) {
             allRawRestaurants.addAll(rawRestaurants.get(i).get());
           }
           break;
