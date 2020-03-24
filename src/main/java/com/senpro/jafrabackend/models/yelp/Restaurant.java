@@ -6,6 +6,7 @@ import com.senpro.jafrabackend.enums.Price;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Document(collection = "Restaurants")
 public class Restaurant {
   private String id;
   private String alias;
