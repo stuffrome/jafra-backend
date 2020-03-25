@@ -12,4 +12,6 @@ public interface WishListRepository extends MongoRepository<WishListEntry, Strin
     boolean existsById_UsernameAndId_RestaurantId(String username, String restaurantId);
     List<WishListEntry> getAllById_Username(String username);
     WishListEntry getById_UsernameAndId_RestaurantId(String username, String restaurantId);
+    void deleteById_UsernameAndId_RestaurantId(String username, String restaurantId);
+
 }

@@ -11,7 +11,7 @@ import java.util.Date;
 @Document(collection = "visited")
 public class VisitedRestaurant {
   @Id private VisitedKey id;
-  private float userRating;
+  private double userRating;
   private Date reviewDate;
   @Data
   static public class VisitedKey implements Serializable{

@@ -46,8 +46,7 @@ public class WishListController {
 
   @PostMapping("/remove")
   public ResponseEntity<String> removeWishListEntry(
-      @RequestParam String username, @RequestParam String restaurantId)
-      throws InvalidNameException, EntityExistsException, EntityNotFoundException {
+      @RequestParam String username, @RequestParam String restaurantId) throws EntityNotFoundException {
     wishListService.removeWishListEntry(username, restaurantId);
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
   }

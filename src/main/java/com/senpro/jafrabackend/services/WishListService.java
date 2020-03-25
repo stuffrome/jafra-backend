@@ -40,9 +40,9 @@ public class WishListService {
         wishListRepository.save(wishListEntry);
     }
 
-    public void removeWishListEntry(String username, String restaurantId) {
-        WishListEntry wishListEntry = wishListRepository.getById_UsernameAndId_RestaurantId(username, restaurantId);
-        wishListRepository.deleteById(wishListEntry.getId().toString());
+    public void removeWishListEntry(String username, String restaurantId) throws EntityNotFoundException {
+        validateRemoveWishListEntry(username, restaurantId);
+        wishListRepository.deleteById_UsernameAndId_RestaurantId(username, restaurantId);
     }
 
     private void validateWishListEntry(WishListEntry wishListEntry)
@@ -54,6 +54,18 @@ public class WishListService {
                             + wishListEntry.getId().getUsername()
                             + " and restaurantId "
                             + wishListEntry.getId().getRestaurantId());
+        }
+    }
+
+    private void validateRemoveWishListEntry(String username, String restaurantId)
+            throws EntityNotFoundException {
+        if (!wishListRepository.existsById_UsernameAndId_RestaurantId(
+               username, restaurantId)) {
+            throw new EntityNotFoundException(
+                    "No WishListEntry with username "
+                            + username
+                            + " and restaurantId "
+                            + restaurantId);
         }
     }
 }
