@@ -3,7 +3,7 @@ package com.senpro.jafrabackend.services;
 import com.senpro.jafrabackend.exceptions.EntityExistsException;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.exceptions.InvalidNameException;
-import com.senpro.jafrabackend.models.User;
+import com.senpro.jafrabackend.models.user.User;
 import com.senpro.jafrabackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,15 +31,23 @@ public class UserService {
   }
 
   // Adds a user to the database
-  public void addUser(User user) throws InvalidNameException, EntityExistsException {
+  public void addUser(String name, String email, String username)
+      throws InvalidNameException, EntityExistsException {
+    User user = new User(name, email, username);
     validateUser(user);
     userRepository.save(user);
   }
 
+  public void updateUser(User newUser){
+    userRepository.deleteById(newUser.getUsername());
+    userRepository.save(newUser);
+  }
+
   // Finds a user by ID
-  public User findById(String id) throws EntityNotFoundException {
-    Optional<User> optionalUser = userRepository.findById(id);
-    return optionalUser.orElseThrow(() -> new EntityNotFoundException("User with id"));
+  public User findById(String username) throws EntityNotFoundException {
+    Optional<User> optionalUser = userRepository.findById(username);
+    return optionalUser.orElseThrow(
+        () -> new EntityNotFoundException("User with username" + username));
   }
 
   // Validates user fields
@@ -47,7 +55,7 @@ public class UserService {
     if (containsSpecialCharacters(user.getName())) {
       throw new InvalidNameException("Name " + user.getName() + " is invalid.");
     }
-    if (validEmail(user.getEmail())) {
+    if (!validEmail(user.getEmail())) {
       throw new InvalidNameException("Email " + user.getEmail() + " is invalid.");
     }
     if (userRepository.existsByEmail(user.getEmail())) {
@@ -60,7 +68,7 @@ public class UserService {
 
   // Checks for special characters
   private boolean containsSpecialCharacters(String value) {
-    Pattern pattern = Pattern.compile("[a-zA-Z0-9]*");
+    Pattern pattern = Pattern.compile("[a-zA-Z0-9 ]*");
     Matcher matcher = pattern.matcher(value);
     return !matcher.matches();
   }

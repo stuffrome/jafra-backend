@@ -1,0 +1,9 @@
+package com.senpro.jafrabackend.models.user.preferences;
+
+import lombok.Data;
+
+@Data
+public class PricePreference {
+  // ranges from 1 to 4, moves towards the price of positively reviewed restaurants
+  private double preferenceWeight = 2;
+}
