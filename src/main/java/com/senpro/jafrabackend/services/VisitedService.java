@@ -9,9 +9,11 @@ import com.senpro.jafrabackend.models.user.preferences.CuisinePreference;
 import com.senpro.jafrabackend.models.yelp.Category;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.repositories.VisitedRepository;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,16 +36,19 @@ public class VisitedService {
   }
 
   // Adds a visited to the database
-  public void addVisitedRestaurant(String username, String restaurantId, float userRating)
-      throws InvalidNameException, EntityExistsException, EntityNotFoundException {
+  public void addVisitedRestaurant(String username, String restaurantId, double userRating)
+      throws InvalidParameterException, EntityNotFoundException {
     VisitedRestaurant visited = new VisitedRestaurant();
+    if(userRating < 1 || userRating > 5){
+        throw new InvalidParameterException( "Bad rating");
+    }
     VisitedRestaurant.VisitedKey id = new VisitedRestaurant.VisitedKey();
     id.setUsername(username);
     id.setRestaurantId(restaurantId);
     visited.setId(id);
     visited.setUserRating(userRating);
     visited.setReviewDate(new Date());
-    validateVisited(visited);
+    //validateVisited(visited);
     visitedRepository.save(visited);
     updatePreferences(username, restaurantId, userRating);
   }
