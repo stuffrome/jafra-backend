@@ -13,23 +13,21 @@ import java.util.List;
 @Data
 @Document(collection = "users")
 public class User {
-  private final String name;
   private final String email;
+  private String password;
   @Id private String username;
   private List<String> hiddenRestaurants; // list of IDs
   private List<CuisinePreference> cuisinePreferences;
   private RatingPreference ratingPreference;
   private PricePreference pricePreference;
-  //private DistancePreference distancePreference;
 
-  public User(String name, String email, String username) {
-    this.name = name;
-    this.email = email;
+  public User(String username, String email, String password) {
     this.username = username;
+    this.email = email;
+    this.password = password;
     this.hiddenRestaurants = new ArrayList<>();
     this.cuisinePreferences = new ArrayList<>();
     this.pricePreference = new PricePreference();
     this.ratingPreference = new RatingPreference();
-    //this.distancePreference = new DistancePreference();
   }
 }

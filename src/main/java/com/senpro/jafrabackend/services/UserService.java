@@ -6,21 +6,48 @@ import com.senpro.jafrabackend.exceptions.InvalidNameException;
 import com.senpro.jafrabackend.models.user.User;
 import com.senpro.jafrabackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
   private UserRepository userRepository;
+//  private PasswordEncoder passwordEncoder;
+
+  @Value("${jwt.secret}")
+  private String jwtSecret;
 
   @Autowired
   public UserService(UserRepository userRepository) {
     this.userRepository = userRepository;
+//    this.passwordEncoder = passwordEncoder;
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+    User user;
+    try {
+      user = findById(username);
+    } catch (EntityNotFoundException e) {
+      throw new UsernameNotFoundException(
+          "User account with username: " + username + " not found.");
+    }
+
+    return new org.springframework.security.core.userdetails.User(
+        user.getUsername(), user.getPassword(), new ArrayList<>());
   }
 
   // Returns all users in the database
@@ -31,14 +58,15 @@ public class UserService {
   }
 
   // Adds a user to the database
-  public void addUser(String name, String email, String username)
+  public void addUser(String username, String email, String password)
       throws InvalidNameException, EntityExistsException {
-    User user = new User(name, email, username);
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    User user = new User(username, email, encoder.encode(password));
     validateUser(user);
     userRepository.save(user);
   }
 
-  public void updateUser(User newUser){
+  public void updateUser(User newUser) {
     userRepository.deleteById(newUser.getUsername());
     userRepository.save(newUser);
   }
@@ -52,9 +80,6 @@ public class UserService {
 
   // Validates user fields
   private void validateUser(User user) throws InvalidNameException, EntityExistsException {
-    if (containsSpecialCharacters(user.getName())) {
-      throw new InvalidNameException("Name " + user.getName() + " is invalid.");
-    }
     if (!validEmail(user.getEmail())) {
       throw new InvalidNameException("Email " + user.getEmail() + " is invalid.");
     }
