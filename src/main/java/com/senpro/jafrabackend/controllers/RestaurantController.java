@@ -37,17 +37,20 @@ public class RestaurantController {
       @RequestParam(required = false) String restaurantName,
       @RequestParam String latitude,
       @RequestParam String longitude,
-      @RequestParam(required = false, defaultValue = DEFAULT_RADIUS) String radius)
+      @RequestParam(required = false, defaultValue = DEFAULT_RADIUS) String radius,
+      @RequestParam String username)
       throws EntityNotFoundException {
     return ResponseEntity.status(HttpStatus.OK)
         .body(
-            restaurantService.getRestaurants(
-                categories,
-                restaurantName,
-                Double.parseDouble(latitude),
-                Double.parseDouble(longitude),
-                Long.parseLong(radius),
-                0));
+            restaurantService.formatRestaurants(
+                restaurantService.getRestaurants(
+                    categories,
+                    restaurantName,
+                    Double.parseDouble(latitude),
+                    Double.parseDouble(longitude),
+                    Long.parseLong(radius),
+                    0),
+                username));
   }
 
   @GetMapping("/details")
@@ -68,14 +71,18 @@ public class RestaurantController {
       @RequestParam String pageSize)
       throws EntityNotFoundException {
 
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(
-            restaurantService.getRecommendedRestaurants(
-                categories,
-                username,
-                Double.parseDouble(latitude),
-                Double.parseDouble(longitude),
-                Integer.parseInt(pageNumber),
-                Integer.parseInt(pageSize)));
+    RecommendedRestaurantResponse response =
+        restaurantService.getRecommendedRestaurants(
+            categories,
+            username,
+            Double.parseDouble(latitude),
+            Double.parseDouble(longitude),
+            Integer.parseInt(pageNumber),
+            Integer.parseInt(pageSize));
+
+    response.setRestaurants(
+        restaurantService.formatRestaurants(response.getRestaurants(), username));
+
+    return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }

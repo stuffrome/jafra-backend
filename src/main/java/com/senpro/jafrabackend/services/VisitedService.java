@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -140,6 +141,15 @@ public class VisitedService {
     List<VisitedRestaurant> visited = visitedRepository.getAllById_Username(username);
     if (visited == null) throw new EntityNotFoundException("Visited");
     return visited;
+  }
+
+  // Turns visited restaurants into restaurants
+  public List<Restaurant> getRestaurantsFromVisited(List<VisitedRestaurant> visitedRestaurants, String username) throws EntityNotFoundException {
+    List<Restaurant> restaurants = new ArrayList<>();
+    for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
+      restaurants.add(restaurantService.findById(visitedRestaurant.getId().getRestaurantId(), username));
+    }
+    return restaurants;
   }
 
   // Finds a visited by ID

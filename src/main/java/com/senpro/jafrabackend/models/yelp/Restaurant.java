@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
 import java.util.List;
 
 /*
@@ -34,4 +35,8 @@ public class Restaurant {
   private Double rating;
   private Price price;
   private double distance;
+  private double userRating;
+  private Date userReviewDate;
+  private boolean wishList;
+  private boolean visited;
 }

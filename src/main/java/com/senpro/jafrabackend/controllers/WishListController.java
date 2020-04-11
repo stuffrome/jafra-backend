@@ -5,6 +5,7 @@ import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.exceptions.InvalidNameException;
 import com.senpro.jafrabackend.models.user.VisitedRestaurant;
 import com.senpro.jafrabackend.models.user.WishListEntry;
+import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.services.RestaurantService;
 import com.senpro.jafrabackend.services.UserService;
 import com.senpro.jafrabackend.services.VisitedService;
@@ -46,14 +47,20 @@ public class WishListController {
 
   @PostMapping("/remove")
   public ResponseEntity<String> removeWishListEntry(
-      @RequestParam String username, @RequestParam String restaurantId) throws EntityNotFoundException {
+      @RequestParam String username, @RequestParam String restaurantId)
+      throws EntityNotFoundException {
     wishListService.removeWishListEntry(username, restaurantId);
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
   }
 
   @GetMapping("/username")
-  public ResponseEntity<List<WishListEntry>> getWishListEntries(@RequestParam String username)
+  public ResponseEntity<List<Restaurant>> getWishListEntries(@RequestParam String username)
       throws EntityNotFoundException {
-    return ResponseEntity.status(HttpStatus.OK).body(wishListService.getWishListEntries(username));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            restaurantService.formatRestaurants(
+                wishListService.getRestaurantsFromList(
+                    wishListService.getWishListEntries(username), username),
+                username));
   }
 }

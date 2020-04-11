@@ -4,11 +4,14 @@ import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.RecommendedRestaurantResponse;
 import com.senpro.jafrabackend.models.UserRestaurant;
 import com.senpro.jafrabackend.models.user.User;
+import com.senpro.jafrabackend.models.user.VisitedRestaurant;
+import com.senpro.jafrabackend.models.user.WishListEntry;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.repositories.RestaurantRepository;
 import com.senpro.jafrabackend.repositories.UserRestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ public class RestaurantService {
 
   private YelpService apiService;
   private UserService userService;
+  private VisitedService visitedService;
+  private WishListService wishListService;
   private RecommendationAlgorithmService algorithmService;
   private UserRestaurantRepository userRestaurantRepository;
   private RestaurantRepository restaurantRepository;
@@ -35,11 +40,15 @@ public class RestaurantService {
   public RestaurantService(
       YelpService yelpService,
       UserService userService,
+      @Lazy VisitedService visitedService,
+      @Lazy WishListService wishListService,
       RecommendationAlgorithmService algorithmService,
       UserRestaurantRepository userRestaurantRepository,
       RestaurantRepository restaurantRepository) {
     this.apiService = yelpService;
     this.userService = userService;
+    this.visitedService = visitedService;
+    this.wishListService = wishListService;
     this.algorithmService = algorithmService;
     this.userRestaurantRepository = userRestaurantRepository;
     this.restaurantRepository = restaurantRepository;
@@ -235,5 +244,56 @@ public class RestaurantService {
   // Returns more details about a restaurant
   public RestaurantDetails getRestaurantDetails(String id) throws EntityNotFoundException {
     return apiService.getRestaurantDetails(id);
+  }
+
+  public Restaurant findById(String restaurantId, String username) throws EntityNotFoundException {
+    if ("".equals(username)) return getRestaurantDetails(restaurantId);
+    UserRestaurant userRestaurant =
+        userRestaurantRepository
+            .findById(username)
+            .orElseThrow(() -> new EntityNotFoundException("User"));
+    if (userRestaurant.getRestaurantIds().contains(restaurantId))
+      return restaurantRepository
+          .findById(restaurantId)
+          .orElseThrow(() -> new EntityNotFoundException("Restaurant"));
+    return getRestaurantDetails(restaurantId);
+  }
+
+  public Restaurant findById(String restaurantId) throws EntityNotFoundException {
+    return findById(restaurantId, "");
+  }
+
+  // Adds user specific fields to restaurants before returning them to the user
+  public List<Restaurant> formatRestaurants(List<Restaurant> restaurants, String username)
+      throws EntityNotFoundException {
+    List<VisitedRestaurant> visitedRestaurants = visitedService.findByUsername(username);
+    List<WishListEntry> entries = wishListService.getWishListEntries(username);
+
+    for (Restaurant restaurant : restaurants) {
+      // Set both ton false initially
+      restaurant.setVisited(false);
+      restaurant.setWishList(false);
+      // Check to see if the restaurant has been visited
+      for (VisitedRestaurant vR : visitedRestaurants) {
+        if (restaurant.getId().equals(vR.getId().getRestaurantId())) {
+          restaurant.setVisited(true);
+          restaurant.setUserRating(vR.getUserRating());
+          restaurant.setUserReviewDate(vR.getReviewDate());
+          // Remove from the list (small speed op)
+          visitedRestaurants.remove(vR);
+          break;
+        }
+      }
+      // Check to see if the restaurant is on the wish list
+      for (WishListEntry entry : entries) {
+        if (restaurant.getId().equals(entry.getId().getRestaurantId())) {
+          restaurant.setWishList(true);
+          // Remove from the list (small speed op)
+          entries.remove(entry);
+          break;
+        }
+      }
+    }
+    return restaurants;
   }
 }

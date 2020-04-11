@@ -4,6 +4,7 @@ import com.senpro.jafrabackend.exceptions.EntityExistsException;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.exceptions.InvalidNameException;
 import com.senpro.jafrabackend.models.user.VisitedRestaurant;
+import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.services.RestaurantService;
 import com.senpro.jafrabackend.services.UserService;
 import com.senpro.jafrabackend.services.VisitedService;
@@ -29,7 +30,8 @@ public class VisitedController {
   private RestaurantService restaurantService;
 
   @Autowired
-  public VisitedController(VisitedService visitedService, UserService userService, RestaurantService restaurantService) {
+  public VisitedController(
+      VisitedService visitedService, UserService userService, RestaurantService restaurantService) {
     this.visitedService = visitedService;
     this.userService = userService;
     this.restaurantService = restaurantService;
@@ -51,13 +53,17 @@ public class VisitedController {
     restaurantService.getRestaurantDetails(restaurantId);
     visitedService.addVisitedRestaurant(username, restaurantId, userRating);
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
-
   }
 
   @GetMapping("/username")
-  public ResponseEntity<List<VisitedRestaurant>> findById(@RequestParam String username)
+  public ResponseEntity<List<Restaurant>> findById(@RequestParam String username)
       throws EntityNotFoundException {
-    return ResponseEntity.status(HttpStatus.OK).body(visitedService.findByUsername(username));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            restaurantService.formatRestaurants(
+                visitedService.getRestaurantsFromVisited(
+                    visitedService.findByUsername(username), username),
+                username));
   }
 
   @GetMapping("/id")
