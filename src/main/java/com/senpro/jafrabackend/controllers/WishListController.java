@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/wishlist")
-@CrossOrigin(origins = "https://jafra.herokuapp.com")
+@CrossOrigin
 public class WishListController {
   private WishListService wishListService;
   private UserService userService;

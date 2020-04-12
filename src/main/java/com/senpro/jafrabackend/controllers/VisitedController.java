@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/visited")
-@CrossOrigin(origins = "https://jafra.herokuapp.com")
+@CrossOrigin
 public class VisitedController {
 
   private VisitedService visitedService;
@@ -52,7 +52,7 @@ public class VisitedController {
     userService.findById(username);
     restaurantService.getRestaurantDetails(restaurantId);
     visitedService.addVisitedRestaurant(username, restaurantId, userRating);
-    return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   @GetMapping("/username")
