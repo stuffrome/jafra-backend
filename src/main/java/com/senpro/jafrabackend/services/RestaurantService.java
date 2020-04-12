@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
@@ -261,6 +262,13 @@ public class RestaurantService {
 
   public Restaurant findById(String restaurantId) throws EntityNotFoundException {
     return findById(restaurantId, "");
+  }
+
+  // Filters out visited restaurants
+  public List<Restaurant> filterOutVisited(List<Restaurant> restaurants) {
+    return restaurants.stream()
+        .filter(restaurant -> !restaurant.isVisited())
+        .collect(Collectors.toList());
   }
 
   // Adds user specific fields to restaurants before returning them to the user

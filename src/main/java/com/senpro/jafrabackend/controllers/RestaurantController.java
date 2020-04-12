@@ -6,6 +6,7 @@ import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.services.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.SpringVersion;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -40,6 +41,7 @@ public class RestaurantController {
       @RequestParam(required = false, defaultValue = DEFAULT_RADIUS) String radius,
       @RequestParam String username)
       throws EntityNotFoundException {
+    System.out.print(SpringVersion.getVersion());
     return ResponseEntity.status(HttpStatus.OK)
         .body(
             restaurantService.formatRestaurants(
@@ -81,7 +83,8 @@ public class RestaurantController {
             Integer.parseInt(pageSize));
 
     response.setRestaurants(
-        restaurantService.formatRestaurants(response.getRestaurants(), username));
+        restaurantService.filterOutVisited(
+            restaurantService.formatRestaurants(response.getRestaurants(), username)));
 
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
