@@ -1,5 +1,6 @@
 package com.senpro.jafrabackend.controllers;
 
+import com.senpro.jafrabackend.enums.Sort;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.RecommendedRestaurantResponse;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
@@ -39,7 +40,8 @@ public class RestaurantController {
       @RequestParam String latitude,
       @RequestParam String longitude,
       @RequestParam(required = false, defaultValue = DEFAULT_RADIUS) String radius,
-      @RequestParam String username)
+      @RequestParam String username,
+      @RequestParam String sort)
       throws EntityNotFoundException {
     System.out.print(SpringVersion.getVersion());
     return ResponseEntity.status(HttpStatus.OK)
@@ -51,7 +53,8 @@ public class RestaurantController {
                     Double.parseDouble(latitude),
                     Double.parseDouble(longitude),
                     Long.parseLong(radius),
-                    0),
+                    0,
+                    sort),
                 username));
   }
 

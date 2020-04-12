@@ -221,7 +221,7 @@ public class RestaurantService {
     List<Future<List<Restaurant>>> rawRestaurants = new ArrayList<>();
 
     for (int i = 0; i < NUM_YELP_CALLS; i++) {
-      rawRestaurants.add(getRestaurants(category, latitude, longitude, 10000, 50 * i));
+      rawRestaurants.add(getRestaurants(category, latitude, longitude, 10000, 50 * i, String.valueOf(Sort.RELEVANCE)));
     }
     /*
     Future<List<Restaurant>> rawRestaurants1 =
@@ -283,18 +283,21 @@ public class RestaurantService {
       double latitude,
       double longitude,
       long radius,
-      int offset)
+      int offset,
+      String sort)
       throws EntityNotFoundException {
-    return apiService.getRestaurants(
-        categories, restaurantName, latitude, longitude, radius, offset);
+    return sort(
+        apiService.getRestaurants(categories, restaurantName, latitude, longitude, radius, offset),
+        sort);
   }
 
   // Returns a list of restaurants sorted by distance
   @Async
   public Future<List<Restaurant>> getRestaurants(
-      String categories, double latitude, double longitude, long radius, int offset)
+      String categories, double latitude, double longitude, long radius, int offset, String sort)
       throws EntityNotFoundException {
-    return new AsyncResult<>(getRestaurants(categories, "", latitude, longitude, radius, offset));
+    return new AsyncResult<>(
+        getRestaurants(categories, "", latitude, longitude, radius, offset, sort));
   }
 
   // Returns more details about a restaurant
