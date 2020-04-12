@@ -82,10 +82,6 @@ public class RestaurantController {
             Integer.parseInt(pageNumber),
             Integer.parseInt(pageSize));
 
-    response.setRestaurants(
-        restaurantService.filterOutVisited(
-            restaurantService.formatRestaurants(response.getRestaurants(), username)));
-
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }

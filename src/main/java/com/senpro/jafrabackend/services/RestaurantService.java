@@ -77,14 +77,16 @@ public class RestaurantService {
       } else clearCache(username, userRestaurant.get().getRestaurantIds());
     }
     List<Restaurant> restaurants = updateUserRestaurants(category, username, latitude, longitude);
-    return paginateRestaurants(restaurants, pageSize, pageNumber);
+    return paginateRestaurants(
+        filterOutVisited(formatRestaurants(restaurants, username)), pageSize, pageNumber);
   }
 
   private RecommendedRestaurantResponse getSortedRestaurantsFromCache(
       List<String> restaurantIds, String username, int pageNumber, int pageSize)
       throws EntityNotFoundException {
 
-    List<Restaurant> restaurants = getUserRestaurants(restaurantIds);
+    List<Restaurant> restaurants =
+        filterOutVisited(formatRestaurants(getUserRestaurants(restaurantIds), username));
     List<Restaurant> sortedRestaurants =
         sortRestaurants(restaurants, userService.findById(username));
     return paginateRestaurants(sortedRestaurants, pageSize, pageNumber);
