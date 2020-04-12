@@ -70,7 +70,8 @@ public class RestaurantController {
       @RequestParam String longitude,
       @RequestParam String username,
       @RequestParam String pageNumber,
-      @RequestParam String pageSize)
+      @RequestParam String pageSize,
+      @RequestParam String sort)
       throws EntityNotFoundException {
 
     RecommendedRestaurantResponse response =
@@ -80,7 +81,8 @@ public class RestaurantController {
             Double.parseDouble(latitude),
             Double.parseDouble(longitude),
             Integer.parseInt(pageNumber),
-            Integer.parseInt(pageSize));
+            Integer.parseInt(pageSize),
+            sort);
 
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }

@@ -1,5 +1,6 @@
 package com.senpro.jafrabackend.services;
 
+import com.senpro.jafrabackend.enums.Sort;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.RecommendedRestaurantResponse;
 import com.senpro.jafrabackend.models.UserRestaurant;
@@ -19,6 +20,8 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -67,7 +70,8 @@ public class RestaurantService {
       double latitude,
       double longitude,
       int pageNumber,
-      int pageSize)
+      int pageSize,
+      String sort)
       throws EntityNotFoundException {
     Optional<UserRestaurant> userRestaurant = getUserRestaurantList(username);
 
@@ -78,22 +82,23 @@ public class RestaurantService {
           latitude,
           longitude)) {
         return getSortedRestaurantsFromCache(
-            userRestaurant.get().getRestaurantIds(), username, pageNumber, pageSize);
+            userRestaurant.get().getRestaurantIds(), username, pageNumber, pageSize, sort);
       } else clearCache(username, userRestaurant.get().getRestaurantIds());
     }
-    List<Restaurant> restaurants = updateUserRestaurants(category, username, latitude, longitude);
+    List<Restaurant> restaurants =
+        updateUserRestaurants(category, username, latitude, longitude, sort);
     return paginateRestaurants(
         filterOutVisited(formatRestaurants(restaurants, username)), pageSize, pageNumber);
   }
 
   private RecommendedRestaurantResponse getSortedRestaurantsFromCache(
-      List<String> restaurantIds, String username, int pageNumber, int pageSize)
+      List<String> restaurantIds, String username, int pageNumber, int pageSize, String sort)
       throws EntityNotFoundException {
 
     List<Restaurant> restaurants =
         filterOutVisited(formatRestaurants(getUserRestaurants(restaurantIds, username), username));
     List<Restaurant> sortedRestaurants =
-        sortRestaurants(restaurants, userService.findById(username));
+        sortRestaurants(restaurants, userService.findById(username), sort);
     return paginateRestaurants(sortedRestaurants, pageSize, pageNumber);
   }
 
@@ -144,14 +149,56 @@ public class RestaurantService {
     return cacheService.getRestaurants(restaurantIds, username);
   }
 
-  private List<Restaurant> sortRestaurants(List<Restaurant> restaurants, User user) {
-    // Sorts the sorted restaurants
-    return algorithmService.sortRestaurants(
-        restaurants,
-        user.getCuisinePreferences(),
-        // user.getDistancePreference(),
-        user.getPricePreference(),
-        user.getRatingPreference());
+  private List<Restaurant> sortRestaurants(List<Restaurant> restaurants, User user, String sort) {
+
+    List<Restaurant> filteredRestaurants =
+        algorithmService.sortRestaurants(
+            restaurants,
+            user.getCuisinePreferences(),
+            // user.getDistancePreference(),
+            user.getPricePreference(),
+            user.getRatingPreference());
+
+    return sort(filteredRestaurants, sort);
+  }
+
+  private List<Restaurant> sort(List<Restaurant> restaurants, String sortValue) {
+    List<Restaurant> validRestaurants;
+    Sort sort = Sort.valueOf(sortValue);
+    switch (sort) {
+      case DISTANCE:
+        restaurants.sort(Comparator.nullsLast(Comparator.comparingDouble(Restaurant::getDistance)));
+        break;
+      case NAME:
+        restaurants.sort(Comparator.nullsLast(Comparator.comparing(Restaurant::getName)));
+        break;
+      case RATING:
+        validRestaurants =
+            restaurants.stream()
+                .filter(restaurant -> restaurant.getRating() != null)
+                .collect(Collectors.toList());
+        validRestaurants.sort(Comparator.comparingDouble(Restaurant::getRating));
+        validRestaurants.addAll(
+            restaurants.stream()
+                .filter(restaurant -> restaurant.getRating() == null)
+                .collect(Collectors.toList()));
+        restaurants = validRestaurants;
+        Collections.reverse(restaurants);
+        break;
+      case PRICE:
+        validRestaurants =
+            restaurants.stream()
+                .filter(restaurant -> restaurant.getPrice() != null)
+                .collect(Collectors.toList());
+        validRestaurants.sort(Comparator.comparing(Restaurant::getPrice));
+        validRestaurants.addAll(
+            restaurants.stream()
+                .filter(restaurant -> restaurant.getPrice() == null)
+                .collect(Collectors.toList()));
+        restaurants = validRestaurants;
+        break;
+    }
+    return restaurants;
   }
 
   @Async
@@ -164,7 +211,7 @@ public class RestaurantService {
 
   // Update's the user's recommended restaurants
   private List<Restaurant> updateUserRestaurants(
-      String category, String username, double latitude, double longitude)
+      String category, String username, double latitude, double longitude, String sort)
       throws EntityNotFoundException {
 
     // Throws exception if not found
@@ -204,7 +251,7 @@ public class RestaurantService {
     }
 
     // Sorts the restaurants
-    List<Restaurant> sortedRestaurants = sortRestaurants(allRawRestaurants, user);
+    List<Restaurant> sortedRestaurants = sortRestaurants(allRawRestaurants, user, sort);
 
     // Saves the sorted restaurants in the DB
     saveRestaurants(sortedRestaurants, username, latitude, longitude);
