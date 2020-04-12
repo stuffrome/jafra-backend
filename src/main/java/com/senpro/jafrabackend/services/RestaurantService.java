@@ -11,6 +11,8 @@ import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.repositories.RestaurantRepository;
 import com.senpro.jafrabackend.repositories.UserRestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -34,6 +36,7 @@ public class RestaurantService {
   private VisitedService visitedService;
   private WishListService wishListService;
   private RecommendationAlgorithmService algorithmService;
+  private CacheService cacheService;
   private UserRestaurantRepository userRestaurantRepository;
   private RestaurantRepository restaurantRepository;
 
@@ -44,6 +47,7 @@ public class RestaurantService {
       @Lazy VisitedService visitedService,
       @Lazy WishListService wishListService,
       RecommendationAlgorithmService algorithmService,
+      CacheService cacheService,
       UserRestaurantRepository userRestaurantRepository,
       RestaurantRepository restaurantRepository) {
     this.apiService = yelpService;
@@ -51,6 +55,7 @@ public class RestaurantService {
     this.visitedService = visitedService;
     this.wishListService = wishListService;
     this.algorithmService = algorithmService;
+    this.cacheService = cacheService;
     this.userRestaurantRepository = userRestaurantRepository;
     this.restaurantRepository = restaurantRepository;
   }
@@ -86,7 +91,7 @@ public class RestaurantService {
       throws EntityNotFoundException {
 
     List<Restaurant> restaurants =
-        filterOutVisited(formatRestaurants(getUserRestaurants(restaurantIds), username));
+        filterOutVisited(formatRestaurants(getUserRestaurants(restaurantIds, username), username));
     List<Restaurant> sortedRestaurants =
         sortRestaurants(restaurants, userService.findById(username));
     return paginateRestaurants(sortedRestaurants, pageSize, pageNumber);
@@ -126,16 +131,17 @@ public class RestaurantService {
         && Math.abs(oldLongitude - newLongitude) <= LAT_LON_ERROR_TOLERANCE;
   }
 
-  private void clearCache(String username, List<String> restaurantIds) {
+  @CacheEvict("restaurants")
+  public void clearCache(String username, List<String> restaurantIds) {
+    cacheService.clearCache(username);
     userRestaurantRepository.deleteById(username);
     restaurantIds.forEach(rId -> restaurantRepository.deleteById(rId));
   }
 
   // Return the list of restaurants in the database for a user
-  private List<Restaurant> getUserRestaurants(List<String> restaurantIds) {
-    List<Restaurant> restaurants = new ArrayList<>();
-    restaurantIds.forEach(id -> restaurantRepository.findById(id).ifPresent(restaurants::add));
-    return restaurants;
+  @Cacheable(value = "restaurants", key = "#username")
+  public List<Restaurant> getUserRestaurants(List<String> restaurantIds, String username) {
+    return cacheService.getRestaurants(restaurantIds, username);
   }
 
   private List<Restaurant> sortRestaurants(List<Restaurant> restaurants, User user) {

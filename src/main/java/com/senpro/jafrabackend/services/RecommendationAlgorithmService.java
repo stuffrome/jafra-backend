@@ -27,16 +27,16 @@ public class RecommendationAlgorithmService {
     Map<Double, Restaurant> scores = new TreeMap<Double, Restaurant>(Collections.reverseOrder());
     Map<Restaurant, List<Double>> weightsDebug = new HashMap<Restaurant, List<Double>>();
 
-    System.out.println(
-        "User Preferences:\n\tPrice Preference: "
-            + userPricePreference.getPreferenceWeight()
-            + "\n\tRating Preference: "
-            + userRatingPreference.getPreferenceWeight()
-            + "\n\tCuisine Preferences:");
+//    System.out.println(
+//        "User Preferences:\n\tPrice Preference: "
+//            + userPricePreference.getPreferenceWeight()
+//            + "\n\tRating Preference: "
+//            + userRatingPreference.getPreferenceWeight()
+//            + "\n\tCuisine Preferences:");
     for (CuisinePreference cp : userCuisinePreferences) {
-      System.out.println("\t\t" + cp.getCuisineAlias() + ": " + cp.getPreferenceWeight());
+//      System.out.println("\t\t" + cp.getCuisineAlias() + ": " + cp.getPreferenceWeight());
     }
-    System.out.println("Ranking " + restaurants.size() + " restaurants:");
+//    System.out.println("Ranking " + restaurants.size() + " restaurants:");
     for (Restaurant restaurant : restaurants) {
       List<Double> weights = new ArrayList<Double>();
       boolean crapRestaurant = true;
@@ -127,17 +127,17 @@ public class RecommendationAlgorithmService {
 
     int i = 1;
     for (double s : scores.keySet()) {
-      System.out.println("" + i + ": " + s + " = " + scores.get(s).getName());
+//      System.out.println("" + i + ": " + s + " = " + scores.get(s).getName());
       List<Double> weights = weightsDebug.get(scores.get(s));
-      System.out.println(
-          "\tCuisine Weight: "
-              + weights.get(0)
-              + ", Distance Weight: "
-              + weights.get(1)
-              + ", Price Weight: "
-              + weights.get(2)
-              + ", Rating Weight: "
-              + weights.get(3));
+//      System.out.println(
+//          "\tCuisine Weight: "
+//              + weights.get(0)
+//              + ", Distance Weight: "
+//              + weights.get(1)
+//              + ", Price Weight: "
+//              + weights.get(2)
+//              + ", Rating Weight: "
+//              + weights.get(3));
       i++;
     }
     List<Restaurant> scoredRests = new ArrayList<Restaurant>(scores.values());
