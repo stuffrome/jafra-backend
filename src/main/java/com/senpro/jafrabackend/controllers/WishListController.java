@@ -53,7 +53,7 @@ public class WishListController {
     return ResponseEntity.status(HttpStatus.CREATED).body("Success!");
   }
 
-  @GetMapping("/username")
+  @GetMapping
   public ResponseEntity<List<Restaurant>> getWishListEntries(@RequestParam String username)
       throws EntityNotFoundException {
     return ResponseEntity.status(HttpStatus.OK)
