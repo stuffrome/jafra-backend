@@ -62,21 +62,25 @@ public class VisitedService {
     /*user.getDistancePreference()
         .setPreferenceWeight(getNewWeight(user.getDistancePreference().getPreferenceWeight(), restaurant.getDistance(), numVisited, userRating ));
     System.out.println("New dist: " + user.getDistancePreference().getPreferenceWeight());*/
-    user.getPricePreference()
-        .setPreferenceWeight(
-            getNewWeight(
-                user.getPricePreference().getPreferenceWeight(),
-                restaurant.getPrice().ordinal() + 1,
-                numVisited,
-                userRating));
+    if(restaurant.getPrice() != null ){
+        user.getPricePreference()
+                .setPreferenceWeight(
+                        getNewWeight(
+                                user.getPricePreference().getPreferenceWeight(),
+                                restaurant.getPrice().ordinal() + 1,
+                                numVisited,
+                                userRating));
+    }
     System.out.println("New price: " + user.getPricePreference().getPreferenceWeight());
-    user.getRatingPreference()
-        .setPreferenceWeight(
-            getNewWeight(
-                user.getRatingPreference().getPreferenceWeight(),
-                restaurant.getRating(),
-                numVisited,
-                userRating));
+    if (restaurant.getRating() != null) {
+      user.getRatingPreference()
+          .setPreferenceWeight(
+              getNewWeight(
+                  user.getRatingPreference().getPreferenceWeight(),
+                  restaurant.getRating(),
+                  numVisited,
+                  userRating));
+    }
     System.out.println("New rating: " + user.getRatingPreference().getPreferenceWeight());
     List<CuisinePreference> cps = user.getCuisinePreferences();
     for (Category category : restaurant.getCategories()) {
@@ -84,14 +88,14 @@ public class VisitedService {
       boolean found = false;
       for (CuisinePreference cp : cps) {
         if (cp.getCuisineAlias().equals(alias)) {
-          cp.setPreferenceWeight(cp.getPreferenceWeight() + Math.pow(userRating, 1.0/3) * 3);
+          cp.setPreferenceWeight(cp.getPreferenceWeight() + (Math.pow(userRating, 2) / 5.0 - 1.3) * 1.2);
           found = true;
         }
       }
       if (!found) {
         CuisinePreference newCP = new CuisinePreference();
         newCP.setCuisineAlias(alias);
-        newCP.setPreferenceWeight(Math.sqrt(userRating));
+        newCP.setPreferenceWeight((Math.pow(userRating, 2) / 5.0 - 1.3) * 1.2);
         cps.add(newCP);
       }
     }

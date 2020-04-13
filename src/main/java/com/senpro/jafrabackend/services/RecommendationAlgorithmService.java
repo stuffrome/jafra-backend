@@ -33,9 +33,9 @@ public class RecommendationAlgorithmService {
 //            + "\n\tRating Preference: "
 //            + userRatingPreference.getPreferenceWeight()
 //            + "\n\tCuisine Preferences:");
-    for (CuisinePreference cp : userCuisinePreferences) {
+    //for (CuisinePreference cp : userCuisinePreferences) {
 //      System.out.println("\t\t" + cp.getCuisineAlias() + ": " + cp.getPreferenceWeight());
-    }
+    //}
 //    System.out.println("Ranking " + restaurants.size() + " restaurants:");
     for (Restaurant restaurant : restaurants) {
       List<Double> weights = new ArrayList<Double>();
