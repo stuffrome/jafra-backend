@@ -333,6 +333,36 @@ public class RestaurantService {
         .collect(Collectors.toList());
   }
 
+  public RestaurantDetails formatRestaurant(RestaurantDetails restaurant, String username) throws EntityNotFoundException {
+    restaurant.setVisited(false);
+    restaurant.setWishList(false);
+
+    List<VisitedRestaurant> visitedRestaurants = visitedService.findByUsername(username);
+    List<WishListEntry> entries = wishListService.getWishListEntries(username);
+
+    // Same code as below (can't because we are using a different restaurant object
+    for (VisitedRestaurant vR : visitedRestaurants) {
+      if (restaurant.getId().equals(vR.getId().getRestaurantId())) {
+        restaurant.setVisited(true);
+        restaurant.setUserRating(vR.getUserRating());
+        restaurant.setUserReviewDate(vR.getReviewDate());
+        // Remove from the list (small speed op)
+        visitedRestaurants.remove(vR);
+        break;
+      }
+    }
+    // Check to see if the restaurant is on the wish list
+    for (WishListEntry entry : entries) {
+      if (restaurant.getId().equals(entry.getId().getRestaurantId())) {
+        restaurant.setWishList(true);
+        // Remove from the list (small speed op)
+        entries.remove(entry);
+        break;
+      }
+    }
+    return restaurant;
+  }
+
   // Adds user specific fields to restaurants before returning them to the user
   public List<Restaurant> formatRestaurants(List<Restaurant> restaurants, String username)
       throws EntityNotFoundException {

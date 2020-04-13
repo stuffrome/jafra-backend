@@ -3,6 +3,7 @@ package com.senpro.jafrabackend.controllers;
 import com.senpro.jafrabackend.enums.Sort;
 import com.senpro.jafrabackend.exceptions.EntityNotFoundException;
 import com.senpro.jafrabackend.models.RecommendedRestaurantResponse;
+import com.senpro.jafrabackend.models.authentication.JWTRequest;
 import com.senpro.jafrabackend.models.yelp.Restaurant;
 import com.senpro.jafrabackend.models.yelp.details.RestaurantDetails;
 import com.senpro.jafrabackend.services.RestaurantService;
@@ -12,10 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -59,9 +62,12 @@ public class RestaurantController {
   }
 
   @GetMapping("/details")
-  public ResponseEntity<RestaurantDetails> getRestaurantDetails(@RequestParam String id)
-      throws EntityNotFoundException {
-    return ResponseEntity.status(HttpStatus.OK).body(restaurantService.getRestaurantDetails(id));
+  public ResponseEntity<RestaurantDetails> getRestaurantDetails(
+      @RequestParam String id, @RequestParam String username) throws EntityNotFoundException {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            restaurantService.formatRestaurant(
+                restaurantService.getRestaurantDetails(id), username));
   }
 
   // Updates users recommended restaurants. If latitude and longitude are passed in, the users
