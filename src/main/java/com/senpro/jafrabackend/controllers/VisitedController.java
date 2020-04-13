@@ -37,12 +37,6 @@ public class VisitedController {
     this.restaurantService = restaurantService;
   }
 
-  @GetMapping
-  public ResponseEntity<List<VisitedRestaurant>> getVisitedRestaurants()
-      throws EntityNotFoundException {
-    return ResponseEntity.status(HttpStatus.OK).body(visitedService.getVisitedRestaurants());
-  }
-
   @PostMapping
   public ResponseEntity<String> addVisitedRestaurant(
       @RequestParam String username,
@@ -55,8 +49,8 @@ public class VisitedController {
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
-  @GetMapping("/username")
-  public ResponseEntity<List<Restaurant>> findById(@RequestParam String username)
+  @GetMapping
+  public ResponseEntity<List<Restaurant>> getVisitedRestaurants(@RequestParam String username)
       throws EntityNotFoundException {
     return ResponseEntity.status(HttpStatus.OK)
         .body(
