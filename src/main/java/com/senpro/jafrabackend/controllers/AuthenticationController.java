@@ -34,9 +34,11 @@ public class AuthenticationController {
     this.userService = userService;
   }
 
+  // JWT implemented with the help of
+  // https://www.javainuse.com/spring/boot-jwt
   @PostMapping("/authenticate")
-  public ResponseEntity<JWTResponse> createAuthenticationToken(@RequestBody JWTRequest authenticationRequest)
-      throws Exception {
+  public ResponseEntity<JWTResponse> createAuthenticationToken(
+      @RequestBody JWTRequest authenticationRequest) throws Exception {
 
     authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
