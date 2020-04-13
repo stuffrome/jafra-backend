@@ -122,7 +122,9 @@ public class RestaurantService {
   }
 
   private boolean validatePageParameters(int pageSize, int pageNumber, int resultSize) {
-    return pageNumber > 0 && pageSize > 0 && pageNumber <= (resultSize / pageSize);
+    int maxPages = resultSize / pageSize;
+    if (resultSize % pageSize > 0) ++maxPages;
+    return pageNumber > 0 && pageSize > 0 && pageNumber <= maxPages;
   }
 
   private Optional<UserRestaurant> getUserRestaurantList(String username) {
@@ -221,7 +223,9 @@ public class RestaurantService {
     List<Future<List<Restaurant>>> rawRestaurants = new ArrayList<>();
 
     for (int i = 0; i < NUM_YELP_CALLS; i++) {
-      rawRestaurants.add(getRestaurants(category, latitude, longitude, 10000, 50 * i, String.valueOf(Sort.RELEVANCE)));
+      rawRestaurants.add(
+          getRestaurants(
+              category, latitude, longitude, 10000, 50 * i, String.valueOf(Sort.RELEVANCE)));
     }
     /*
     Future<List<Restaurant>> rawRestaurants1 =
